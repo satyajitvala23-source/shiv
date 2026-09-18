@@ -11,7 +11,6 @@ import {
   UserCheck,
   Menu,
   X,
-  ExternalLink,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { LANGUAGES } from '../../translations';
@@ -37,7 +36,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     currentUser,
     notifications,
     markNotificationAsRead,
-    loginAs,
     logout,
   } = useApp();
 
@@ -127,36 +125,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right Controls: Role Switcher Shortcut, Language, Theme, Notifications, Profile */}
+      {/* Right Controls: Language, Theme, Notifications, Profile */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Quick Role Switcher for Demo testing */}
-        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
-          <button
-            type="button"
-            id="switch-to-admin-btn"
-            onClick={() => loginAs('admin')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-              role === 'admin'
-                ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Admin View
-          </button>
-          <button
-            type="button"
-            id="switch-to-user-btn"
-            onClick={() => loginAs('user')}
-            className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-              role === 'user'
-                ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            User View
-          </button>
-        </div>
-
         {/* Language Selector */}
         <div className="relative" ref={langRef}>
           <button
@@ -309,22 +279,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    loginAs(role === 'admin' ? 'user' : 'admin');
-                    setIsProfileOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Switch to {role === 'admin' ? 'User Portal' : 'Admin Portal'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
                     setIsProfileOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors mt-1"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{t.adminSidebar.logout}</span>

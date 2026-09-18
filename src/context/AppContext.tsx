@@ -99,7 +99,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [language, setLanguage] = useState<LanguageCode>('en');
-  const [theme, setTheme] = useState<ThemeMode>('light');
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    try {
+      const savedTheme = localStorage.getItem('sc_theme');
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+      }
+    } catch {
+      // localStorage fallback
+    }
+    return 'light';
+  });
 
   // Core Data
   const [currentUser, setCurrentUser] = useState<CustomerUser>(CURRENT_USER);
@@ -225,12 +235,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentView]);
 
-  // Apply dark class to documentElement
+  // Apply dark and dark-mode classes to documentElement & body, and save to localStorage
   useEffect(() => {
+    try {
+      localStorage.setItem('sc_theme', theme);
+    } catch {
+      // ignore
+    }
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('dark', 'dark-mode');
+      document.body.classList.add('dark', 'dark-mode');
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('dark', 'dark-mode');
+      document.body.classList.remove('dark', 'dark-mode');
     }
   }, [theme]);
 
