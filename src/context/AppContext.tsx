@@ -26,6 +26,17 @@ import {
   INITIAL_WEBSITE_CONTENT,
 } from '../data/mockData';
 import { TRANSLATIONS } from '../translations';
+import {
+  loginUser,
+  registerUser,
+  logoutUser,
+  subscribeToAuth,
+  subscribeToUsers,
+  updateUserStatus as updateFirestoreUserStatus,
+  updateUserProfile as updateFirestoreUserProfile,
+  LoginParams,
+  RegisterParams,
+} from '../lib/firebase';
 
 interface AppContextType {
   currentView: CurrentView;
@@ -37,6 +48,13 @@ interface AppContextType {
   theme: ThemeMode;
   toggleTheme: () => void;
   t: TranslationStrings;
+
+  // Real Firebase Auth & Session
+  isAuthenticated: boolean;
+  authLoading: boolean;
+  authRole: 'admin' | 'user' | null;
+  loginWithCredentials: (params: LoginParams) => Promise<CustomerUser>;
+  registerNewUser: (params: RegisterParams) => Promise<CustomerUser>;
 
   // Data
   currentUser: CustomerUser;
@@ -51,7 +69,7 @@ interface AppContextType {
 
   // Actions
   loginAs: (role: LoginRole) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 
   // Service Management (Admin)
   addService: (newService: Omit<ServiceItem, 'id'>) => void;
@@ -71,9 +89,10 @@ interface AppContextType {
   applyForService: (service: ServiceItem, applicantNotes?: string) => Application;
   uploadUserDoc: (appId: string, docName: string) => void;
 
-  // Customer Management (Admin)
-  toggleUserStatus: (userId: string) => void;
-  updateUser: (userId: string, updates: Partial<CustomerUser>) => void;
+  // Customer Management (Admin & User Profile)
+  toggleUserStatus: (userId: string) => Promise<void>;
+  updateUser: (userId: string, updates: Partial<CustomerUser>) => Promise<void>;
+  updateUserProfile: (updates: Partial<CustomerUser>) => Promise<void>;
 
   // Notifications
   createNotification: (notif: Omit<NotificationItem, 'id' | 'date' | 'read'>) => void;
@@ -88,15 +107,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & Role State
-  const [selectedRole, setSelectedRole] = useState<LoginRole>('admin');
-  const [currentView, setCurrentView] = useState<CurrentView>(() => {
-    // Check URL or hash if provided
-    const hash = window.location.hash.toLowerCase();
-    const path = window.location.pathname.toLowerCase();
-    if (hash.includes('admin') || path.includes('admin-dashboard')) return 'admin-dashboard';
-    if (hash.includes('user') || path.includes('user-dashboard')) return 'user-dashboard';
-    return 'login';
-  });
+  const [selectedRole, setSelectedRole] = useState<LoginRole>('user');
+  const [currentView, setCurrentView] = useState<CurrentView>('login');
+
+  // Firebase Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authRole, setAuthRole] = useState<'admin' | 'user' | null>(null);
 
   const [language, setLanguage] = useState<LanguageCode>('en');
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -106,7 +123,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return savedTheme;
       }
     } catch {
-      // localStorage fallback
+      // ignore
     }
     return 'light';
   });
@@ -167,7 +184,114 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_WEBSITE_CONTENT;
   });
 
-  // Sync to localStorage
+  // 1. Subscribe to Firebase Auth State changes
+  useEffect(() => {
+    const unsubscribe = subscribeToAuth((fbUser, role) => {
+      if (fbUser) {
+        setCurrentUser(fbUser);
+        setAuthRole(role);
+        setIsAuthenticated(true);
+        setSelectedRole(role || 'user');
+
+        // Route appropriately based on role
+        const hash = window.location.hash.toLowerCase();
+        if (role === 'admin') {
+          if (hash.includes('user-dashboard')) {
+            setCurrentView('user-dashboard');
+          } else {
+            setCurrentView('admin-dashboard');
+          }
+        } else {
+          // Normal user: strictly restricted to user dashboard
+          setCurrentView('user-dashboard');
+        }
+      } else {
+        setIsAuthenticated(false);
+        setAuthRole(null);
+        setCurrentUser(CURRENT_USER);
+        setCurrentView('login');
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Subscribe to real-time Users list from Firestore for Admin Directory
+  useEffect(() => {
+    // Only subscribe to user directory if authenticated as an administrator
+    if (!isAuthenticated || authRole !== 'admin') {
+      return;
+    }
+
+    const unsubscribe = subscribeToUsers((firestoreUsers) => {
+      if (firestoreUsers && firestoreUsers.length > 0) {
+        setUsers(firestoreUsers);
+        try {
+          localStorage.setItem('sc_users', JSON.stringify(firestoreUsers));
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isAuthenticated, authRole]);
+
+  // 3. Route Protection & Hash Synchronization
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+
+      // If not authenticated, cannot open dashboards
+      if (!authLoading && !isAuthenticated) {
+        if (hash.includes('dashboard')) {
+          setCurrentView('login');
+          window.location.hash = '#/login';
+        }
+        return;
+      }
+
+      if (hash.includes('admin-dashboard')) {
+        // Enforce RBAC: Non-admin users cannot access Admin Dashboard
+        if (authRole !== 'admin') {
+          alert('Access Denied: You do not have Administrator permissions.');
+          setCurrentView('user-dashboard');
+          window.location.hash = '#/user-dashboard';
+        } else {
+          setCurrentView('admin-dashboard');
+          setSelectedRole('admin');
+        }
+      } else if (hash.includes('user-dashboard')) {
+        setCurrentView('user-dashboard');
+        setSelectedRole('user');
+      } else if (hash.includes('login')) {
+        setCurrentView('login');
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [authLoading, isAuthenticated, authRole]);
+
+  // Keep hash aligned with currentView
+  useEffect(() => {
+    if (currentView === 'admin-dashboard') {
+      if (window.location.hash !== '#/admin-dashboard') {
+        window.location.hash = '#/admin-dashboard';
+      }
+    } else if (currentView === 'user-dashboard') {
+      if (window.location.hash !== '#/user-dashboard') {
+        window.location.hash = '#/user-dashboard';
+      }
+    } else {
+      if (window.location.hash !== '#/login') {
+        window.location.hash = '#/login';
+      }
+    }
+  }, [currentView]);
+
+  // Sync auxiliary state to localStorage
   useEffect(() => {
     localStorage.setItem('sc_services', JSON.stringify(services));
   }, [services]);
@@ -193,49 +317,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem('sc_users', JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
     localStorage.setItem('sc_web_content', JSON.stringify(websiteContent));
   }, [websiteContent]);
 
-  // Sync hash with currentView for easy browser back/forward and bookmarking
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.toLowerCase();
-      if (hash.includes('admin-dashboard')) {
-        setCurrentView('admin-dashboard');
-        setSelectedRole('admin');
-      } else if (hash.includes('user-dashboard')) {
-        setCurrentView('user-dashboard');
-        setSelectedRole('user');
-      } else if (hash.includes('login')) {
-        setCurrentView('login');
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  useEffect(() => {
-    if (currentView === 'admin-dashboard') {
-      if (window.location.hash !== '#/admin-dashboard') {
-        window.location.hash = '#/admin-dashboard';
-      }
-    } else if (currentView === 'user-dashboard') {
-      if (window.location.hash !== '#/user-dashboard') {
-        window.location.hash = '#/user-dashboard';
-      }
-    } else {
-      if (window.location.hash !== '#/login') {
-        window.location.hash = '#/login';
-      }
-    }
-  }, [currentView]);
-
-  // Apply dark and dark-mode classes to documentElement & body, and save to localStorage
+  // Apply dark mode classes to documentElement & body
   useEffect(() => {
     try {
       localStorage.setItem('sc_theme', theme);
@@ -255,17 +340,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  const loginAs = (role: LoginRole) => {
+  // Real Firebase Login
+  const loginWithCredentials = async (params: LoginParams): Promise<CustomerUser> => {
+    const { user, role } = await loginUser(params);
+    setCurrentUser(user);
+    setAuthRole(role);
+    setIsAuthenticated(true);
     setSelectedRole(role);
+
     if (role === 'admin') {
       setCurrentView('admin-dashboard');
+      window.location.hash = '#/admin-dashboard';
     } else {
       setCurrentView('user-dashboard');
+      window.location.hash = '#/user-dashboard';
+    }
+
+    return user;
+  };
+
+  // Real Firebase Registration
+  const registerNewUser = async (params: RegisterParams): Promise<CustomerUser> => {
+    const newUser = await registerUser(params);
+    setCurrentUser(newUser);
+    setUsers((prev) => {
+      if (prev.some((u) => u.id === newUser.id || (newUser.username && u.username === newUser.username))) {
+        return prev;
+      }
+      return [newUser, ...prev];
+    });
+    setAuthRole('user');
+    setIsAuthenticated(true);
+    setSelectedRole('user');
+    setCurrentView('user-dashboard');
+    window.location.hash = '#/user-dashboard';
+    return newUser;
+  };
+
+  // Legacy quick login selector
+  const loginAs = (role: LoginRole) => {
+    setSelectedRole(role);
+    if (isAuthenticated) {
+      if (role === 'admin' && authRole === 'admin') {
+        setCurrentView('admin-dashboard');
+      } else {
+        setCurrentView('user-dashboard');
+      }
     }
   };
 
-  const logout = () => {
+  // Real Firebase Sign Out
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    setIsAuthenticated(false);
+    setAuthRole(null);
+    setCurrentUser(CURRENT_USER);
     setCurrentView('login');
+    window.location.hash = '#/login';
   };
 
   // Service Management
@@ -305,18 +440,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Forms Management
   const addForm = (newForm: Omit<FormTemplate, 'id' | 'downloadCount' | 'lastUpdated'>) => {
     const id = `FRM-${Date.now().toString().slice(-4)}`;
-    const item: FormTemplate = {
+    const fullForm: FormTemplate = {
       ...newForm,
       id,
       downloadCount: 0,
       lastUpdated: new Date().toISOString().split('T')[0],
     };
-    setForms((prev) => [item, ...prev]);
+    setForms((prev) => [fullForm, ...prev]);
   };
 
   const updateForm = (id: string, updates: Partial<FormTemplate>) => {
     setForms((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, ...updates, lastUpdated: new Date().toISOString().split('T')[0] } : f))
+      prev.map((f) =>
+        f.id === id
+          ? {
+              ...f,
+              ...updates,
+              lastUpdated: new Date().toISOString().split('T')[0],
+            }
+          : f
+      )
     );
   };
 
@@ -332,11 +475,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const incrementFormDownload = (id: string) => {
     setForms((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, downloadCount: f.downloadCount + 1 } : f))
+      prev.map((f) =>
+        f.id === id ? { ...f, downloadCount: f.downloadCount + 1 } : f
+      )
     );
   };
 
-  // Application Updates
+  // Application Management
   const updateApplicationStatus = (
     id: string,
     status: ApplicationStatus,
@@ -345,43 +490,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setApplications((prev) =>
       prev.map((app) => {
         if (app.id === id) {
-          const updated: Application = {
+          const updated = {
             ...app,
             status,
-            adminNotes: adminNote !== undefined ? adminNote : app.adminNotes,
+            adminNote: adminNote || app.adminNote,
             lastUpdated: new Date().toISOString().split('T')[0],
           };
+
+          createNotification({
+            title: `Application Status Updated: ${status}`,
+            message: `Your application #${app.id} (${app.serviceName}) has been marked as ${status}.${
+              adminNote ? ` Note: "${adminNote}"` : ''
+            }`,
+            targetRole: 'user',
+            userId: app.applicantId,
+            type: status === 'Approved' ? 'success' : status === 'Rejected' ? 'alert' : 'info',
+          });
+
           return updated;
         }
         return app;
       })
     );
-
-    // Also auto-generate notification for the user
-    const targetApp = applications.find((a) => a.id === id);
-    if (targetApp) {
-      createNotification({
-        title: `Application ${id} Status Update`,
-        message: `Your application for "${targetApp.serviceName}" is now marked as ${status}.${
-          adminNote ? ` Admin note: "${adminNote}"` : ''
-        }`,
-        targetRole: 'user',
-        userId: targetApp.applicantId,
-        type:
-          status === 'Approved' || status === 'Completed'
-            ? 'success'
-            : status === 'Rejected'
-            ? 'alert'
-            : status === 'Document Required'
-            ? 'warning'
-            : 'info',
-      });
-    }
   };
 
-  // User applies for service
-  const applyForService = (service: ServiceItem, applicantNotes?: string) => {
-    const newId = `APP-SC-${Math.floor(1000 + Math.random() * 9000)}`;
+  const applyForService = (service: ServiceItem, applicantNotes?: string): Application => {
+    const newId = `APP-${Date.now().toString().slice(-5)}`;
     const newApp: Application = {
       id: newId,
       serviceId: service.id,
@@ -390,38 +524,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       applicantId: currentUser.id,
       applicantName: currentUser.name,
       applicantEmail: currentUser.email,
-      applicantPhone: currentUser.phone,
-      applicantAddress: currentUser.address,
+      applicantPhone: currentUser.phone || '+91 98790 00000',
+      applicantAddress: currentUser.address || 'Keshod, Gujarat',
       applicationDate: new Date().toISOString().split('T')[0],
       status: 'Pending',
       paymentStatus: 'Paid',
       fee: service.fee,
       requiredDocuments: service.requiredDocuments,
-      uploadedDocuments: [
-        {
-          id: `doc-${Date.now()}-1`,
-          name: 'Aadhaar_Verification_Identity.pdf',
-          status: 'Uploaded',
-          size: '1.4 MB',
-          date: new Date().toISOString().split('T')[0],
-        },
-        {
-          id: `doc-${Date.now()}-2`,
-          name: `${service.category === 'agriculture' ? 'Land_Record_Extract_7_12.pdf' : 'Applicant_Declaration.pdf'}`,
-          status: 'Uploaded',
-          size: '2.1 MB',
-          date: new Date().toISOString().split('T')[0],
-        },
-      ],
-      adminNotes: applicantNotes ? `Applicant remarks: ${applicantNotes}` : 'New application submitted via Citizen Portal.',
+      uploadedDocuments: service.requiredDocuments.map((docName, idx) => ({
+        id: `doc-${Date.now()}-${idx}`,
+        name: docName,
+        status: 'Uploaded',
+        size: '1.2 MB',
+        date: new Date().toISOString().split('T')[0],
+      })),
+      adminNotes: applicantNotes,
       lastUpdated: new Date().toISOString().split('T')[0],
     };
 
     setApplications((prev) => [newApp, ...prev]);
 
-    // Add payment record
     const newPayment: PaymentRecord = {
-      id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `TXN-${Date.now().toString().slice(-6)}`,
       applicationId: newId,
       applicantId: currentUser.id,
       applicantName: currentUser.name,
@@ -434,7 +558,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setPayments((prev) => [newPayment, ...prev]);
 
-    // Send notifications
     createNotification({
       title: 'New Application Submitted',
       message: `Your application #${newId} for ${service.name} has been placed into the processing queue.`,
@@ -476,22 +599,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // User Management
-  const toggleUserStatus = (userId: string) => {
+  // User Management with Firestore Sync
+  const toggleUserStatus = async (userId: string) => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+    const newStatus: 'Active' | 'Inactive' = targetUser.status === 'Active' ? 'Inactive' : 'Active';
+
     setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u
-      )
+      prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u))
     );
+
+    try {
+      await updateFirestoreUserStatus(userId, newStatus);
+    } catch (err) {
+      console.error('Failed to update user status in Firestore:', err);
+    }
   };
 
-  const updateUser = (userId: string, updates: Partial<CustomerUser>) => {
+  const updateUser = async (userId: string, updates: Partial<CustomerUser>) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, ...updates } : u))
     );
     if (currentUser.id === userId) {
       setCurrentUser((prev) => ({ ...prev, ...updates }));
     }
+
+    try {
+      await updateFirestoreUserProfile(userId, updates);
+    } catch (err) {
+      console.error('Failed to update user profile in Firestore:', err);
+    }
+  };
+
+  const updateUserProfile = async (updates: Partial<CustomerUser>) => {
+    if (!currentUser.id) return;
+    await updateUser(currentUser.id, updates);
   };
 
   // Notifications
@@ -520,8 +662,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setWebsiteContent((prev) => ({ ...prev, ...updates }));
   };
 
-  const t = TRANSLATIONS[language];
-
   return (
     <AppContext.Provider
       value={{
@@ -533,7 +673,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLanguage,
         theme,
         toggleTheme,
-        t,
+        t: TRANSLATIONS[language],
+        isAuthenticated,
+        authLoading,
+        authRole,
+        loginWithCredentials,
+        registerNewUser,
         currentUser,
         users,
         services,
@@ -559,6 +704,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         uploadUserDoc,
         toggleUserStatus,
         updateUser,
+        updateUserProfile,
         createNotification,
         deleteNotification,
         markNotificationAsRead,

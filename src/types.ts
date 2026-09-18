@@ -77,9 +77,11 @@ export interface FormTemplate {
 export interface CustomerUser {
   id: string;
   name: string;
+  username?: string;
   email: string;
   phone: string;
   address: string;
+  role?: 'admin' | 'user';
   status: 'Active' | 'Inactive';
   joinedDate: string;
   totalApplications: number;
@@ -149,11 +151,34 @@ export interface TranslationStrings {
   loggingIn: string;
   backToHome: string;
   demoCredentialsNote: string;
+  signUpTab: string;
+  signInTab: string;
+  fullNameLabel: string;
+  fullNamePlaceholder: string;
+  usernameLabel: string;
+  usernamePlaceholder: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  confirmPasswordLabel: string;
+  confirmPasswordPlaceholder: string;
+  registerButton: string;
+  registering: string;
+  dontHaveAccount: string;
+  alreadyHaveAccount: string;
+  signUpLink: string;
+  signInLink: string;
   errors: {
     usernameRequired: string;
     emailOrUsernameRequired: string;
     passwordRequired: string;
     passwordTooShort: string;
+    nameRequired: string;
+    usernameInvalid: string;
+    emailInvalid: string;
+    confirmPasswordRequired: string;
+    passwordsDoNotMatch: string;
+    usernameTaken: string;
+    emailAlreadyRegistered: string;
   };
   simulations: {
     loginSuccessTitle: string;

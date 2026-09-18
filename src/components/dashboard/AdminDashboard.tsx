@@ -155,6 +155,7 @@ export const AdminDashboard: React.FC = () => {
     (u) =>
       u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+      (u.username && u.username.toLowerCase().includes(userSearch.toLowerCase())) ||
       u.phone.includes(userSearch)
   );
 
@@ -979,19 +980,35 @@ export const AdminDashboard: React.FC = () => {
                               {user.name.charAt(0)}
                             </div>
                             <div>
-                              <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                                {user.name}
-                              </h3>
-                              <div className="text-[11px] text-slate-400">{user.email}</div>
+                              <div className="flex items-center gap-1.5">
+                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                                  {user.name}
+                                </h3>
+                                <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                                  user.role === 'admin'
+                                    ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                }`}>
+                                  {user.role === 'admin' ? 'Admin' : 'User'}
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1 flex-wrap">
+                                <span>{user.email}</span>
+                                {user.username && (
+                                  <span className="font-mono text-blue-600 dark:text-blue-400 font-medium">
+                                    @{user.username}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => toggleUserStatus(user.id)}
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${
                               user.status === 'Active'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-rose-50 text-rose-700 border-rose-200'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
                             }`}
                           >
                             {user.status}
@@ -999,8 +1016,9 @@ export const AdminDashboard: React.FC = () => {
                         </div>
 
                         <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-300">
-                          <div>Phone: {user.phone}</div>
-                          <div className="truncate">Address: {user.address}</div>
+                          <div>Phone: {user.phone || 'Not provided'}</div>
+                          <div className="truncate">Address: {user.address || 'Keshod, Gujarat'}</div>
+                          <div className="text-[11px] text-slate-400">Registered: {user.joinedDate || 'Recently'}</div>
                         </div>
 
                         <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 grid grid-cols-2 gap-2 text-center text-xs">
