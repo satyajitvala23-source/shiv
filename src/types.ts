@@ -190,6 +190,35 @@ export interface TranslationStrings {
     homeNavTitle: string;
     homeNavMsg: string;
   };
+  forgotPasswordModal: {
+    title: string;
+    subtitle: string;
+    inputLabel: string;
+    inputPlaceholder: string;
+    sendButton: string;
+    sending: string;
+    successTitle: string;
+    successMsg: string;
+    checkInboxNote: string;
+    directLinkTitle: string;
+    directLinkDesc: string;
+    copyLink: string;
+    linkCopied: string;
+    openLink: string;
+    instantResetTab: string;
+    emailLinkTab: string;
+    instantResetTitle: string;
+    instantResetSubtitle: string;
+    newPasswordLabel: string;
+    confirmPasswordLabel: string;
+    updatePasswordBtn: string;
+    updating: string;
+    instantSuccessTitle: string;
+    instantSuccessMsg: string;
+    backToLogin: string;
+    resendLink: string;
+    cancel: string;
+  };
   securityNote: string;
   footerRights: string;
   adminSidebar: {

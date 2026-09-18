@@ -24,7 +24,7 @@ import { useApp } from '../context/AppContext';
 interface LoginFormProps {
   role: LoginRole;
   t: TranslationStrings;
-  onForgotPasswordClick: () => void;
+  onForgotPasswordClick: (prefillIdentifier?: string) => void;
   onBackToHomeClick: () => void;
   onLoginSuccess?: (role: LoginRole) => void;
 }
@@ -64,15 +64,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     text: string;
   } | null>(null);
 
-  // When role changes, if Admin is selected, switch mode to 'login'
+  // When role changes, if Admin is selected, switch mode to 'login' and ensure no credentials prefill
   useEffect(() => {
+    setIdentifier('');
+    setLoginPassword('');
+    setShowPassword(false);
     if (role === 'admin') {
       setAuthMode('login');
-      setIdentifier('satu');
-      setLoginPassword('');
-    } else {
-      setIdentifier('');
-      setLoginPassword('');
     }
     setErrors({});
     setStatusMessage(null);
@@ -476,7 +474,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 <input
                   id="login-password-input"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={role === 'admin' ? 'password' : (showPassword ? 'text' : 'password')}
                   autoComplete="current-password"
                   value={loginPassword}
                   onChange={(e) => {
@@ -485,21 +483,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   }}
                   placeholder={t.passwordPlaceholder}
                   disabled={isLoading}
-                  className={`w-full pl-10 pr-11 py-2.5 sm:py-3 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
+                  className={`w-full pl-10 ${role === 'admin' ? 'pr-3.5' : 'pr-11'} py-2.5 sm:py-3 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.password
                       ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
-                <button
-                  type="button"
-                  id="toggle-password-visibility-btn"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                  title={showPassword ? t.hidePassword : t.showPassword}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                {role !== 'admin' && (
+                  <button
+                    type="button"
+                    id="toggle-password-visibility-btn"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    title={showPassword ? t.hidePassword : t.showPassword}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                )}
               </div>
               {errors.password && (
                 <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
@@ -528,7 +528,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               <button
                 type="button"
                 id="forgot-password-link"
-                onClick={onForgotPasswordClick}
+                onClick={() => onForgotPasswordClick(identifier.trim())}
                 className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline transition-colors"
               >
                 {t.forgotPassword}
@@ -574,18 +574,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 >
                   {t.signUpLink}
                 </button>
-              </div>
-            )}
-
-            {/* Admin Quick Credentials hint */}
-            {role === 'admin' && (
-              <div className="pt-2">
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
-                  <span>Admin Credentials:</span>
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                    satu / 123456
-                  </span>
-                </div>
               </div>
             )}
           </form>

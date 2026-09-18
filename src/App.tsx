@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { HeaderControls } from './components/HeaderControls';
 import { LoginForm } from './components/LoginForm';
 import { NotificationModal } from './components/NotificationModal';
+import { ForgotPasswordModal } from './components/ForgotPasswordModal';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { UserDashboard } from './components/dashboard/UserDashboard';
 
@@ -17,34 +18,20 @@ function AppContent() {
     loginAs,
   } = useApp();
 
-  // Modal dialog state for frontend simulations (Forgot password, Back to Home)
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean;
-    type: 'forgot-password' | 'back-home' | null;
-  }>({
-    isOpen: false,
-    type: null,
-  });
+  // Dedicated Firebase Auth Forgot Password Modal
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [recoveryIdentifier, setRecoveryIdentifier] = useState('');
 
-  const handleForgotPassword = () => {
-    setModalState({
-      isOpen: true,
-      type: 'forgot-password',
-    });
+  // Modal dialog state for frontend back-to-home simulation
+  const [homeModalOpen, setHomeModalOpen] = useState(false);
+
+  const handleForgotPassword = (identifier?: string) => {
+    setRecoveryIdentifier(identifier || '');
+    setForgotPasswordOpen(true);
   };
 
   const handleBackToHome = () => {
-    setModalState({
-      isOpen: true,
-      type: 'back-home',
-    });
-  };
-
-  const handleCloseModal = () => {
-    setModalState({
-      isOpen: false,
-      type: null,
-    });
+    setHomeModalOpen(true);
   };
 
   // 1. STRICT ROLE ENFORCEMENT: If in Admin Dashboard view, render ONLY Admin Dashboard
@@ -135,26 +122,22 @@ function AppContent() {
         </div>
       </footer>
 
-      {/* MODAL FOR FORGOT PASSWORD AND HOME SIMULATIONS */}
+      {/* REAL FIREBASE AUTH FORGOT PASSWORD RECOVERY MODAL */}
+      <ForgotPasswordModal
+        isOpen={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+        initialIdentifier={recoveryIdentifier}
+        language={language}
+        t={t}
+      />
+
+      {/* MODAL FOR HOME NAVIGATION */}
       <NotificationModal
-        isOpen={modalState.isOpen}
-        type={modalState.type}
-        onClose={handleCloseModal}
-        title={
-          modalState.type === 'forgot-password'
-            ? t.simulations.forgotPasswordTitle
-            : t.simulations.homeNavTitle
-        }
-        message={
-          modalState.type === 'forgot-password'
-            ? t.simulations.forgotPasswordMsg
-            : t.simulations.homeNavMsg
-        }
-        subtext={
-          modalState.type === 'forgot-password'
-            ? t.simulations.forgotPasswordInstruction
-            : undefined
-        }
+        isOpen={homeModalOpen}
+        type="back-home"
+        onClose={() => setHomeModalOpen(false)}
+        title={t.simulations.homeNavTitle}
+        message={t.simulations.homeNavMsg}
         closeText={t.simulations.close}
       />
     </div>

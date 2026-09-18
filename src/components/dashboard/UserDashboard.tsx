@@ -24,12 +24,16 @@ import {
   Mail,
   MapPin,
   Calendar,
+  KeyRound,
+  ShieldCheck,
+  Loader2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Application, ApplicationStatus, FormTemplate, ServiceItem } from '../../types';
 import { DashboardHeader } from './DashboardHeader';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplyServiceModal } from './ApplyServiceModal';
+import { sendPasswordReset } from '../../lib/firebase';
 
 type UserTab =
   | 'dashboard'
@@ -81,6 +85,30 @@ export const UserDashboard: React.FC = () => {
   const [phoneInput, setPhoneInput] = useState(currentUser.phone);
   const [addressInput, setAddressInput] = useState(currentUser.address);
   const [profileSavedNotice, setProfileSavedNotice] = useState(false);
+
+  // Profile password reset state
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetStatus, setResetStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleSendProfilePasswordReset = async () => {
+    if (!currentUser.email) return;
+    setIsResettingPassword(true);
+    setResetStatus(null);
+    try {
+      await sendPasswordReset(currentUser.email);
+      setResetStatus({
+        type: 'success',
+        message: `Password reset email dispatched to ${currentUser.email}. Follow the email instructions to reset your password.`,
+      });
+    } catch (err: any) {
+      setResetStatus({
+        type: 'error',
+        message: err?.message || 'Could not send reset link. Please check your connection.',
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
 
   // Support inquiry state
   const [inquirySubject, setInquirySubject] = useState('');
@@ -1120,6 +1148,69 @@ export const UserDashboard: React.FC = () => {
                   </button>
                 </div>
               </form>
+
+              {/* Account Security & Password Recovery */}
+              <div
+                id="user-account-security-card"
+                className="max-w-xl p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5 text-xs sm:text-sm"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
+                    <KeyRound className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white">
+                      Account Security & Password
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Firebase Authentication password recovery & credential management
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">
+                  Need to change or recover your password? Dispatch a secure password reset link to your registered email address ({currentUser.email || 'your email'}) using Firebase Auth.
+                </p>
+
+                {resetStatus && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs flex items-start gap-2 ${
+                      resetStatus.type === 'success'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                    }`}
+                  >
+                    {resetStatus.type === 'success' ? (
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    )}
+                    <span>{resetStatus.message}</span>
+                  </div>
+                )}
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    id="user-send-password-reset-btn"
+                    onClick={handleSendProfilePasswordReset}
+                    disabled={isResettingPassword || !currentUser.email}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors disabled:opacity-50"
+                  >
+                    {isResettingPassword ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Sending Firebase Reset Link...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        <span>Send Password Reset Email</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </main>

@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Shiv Computer - Login</title>
-    <meta name="description" content="Modern and professional frontend login page for Shiv Computer with Admin/User switching and multi-language support." />
+    <meta name="description" content="Complete role-based frontend system for Shiv Computer featuring distinct Admin and User dashboards, application management, services, multilingual support, and dark/light modes." />
     <meta property="og:title" content="Shiv Computer - Login" />
-    <meta property="og:description" content="Modern and professional frontend login page for Shiv Computer with Admin/User switching and multi-language support." />
+    <meta property="og:description" content="Complete role-based frontend system for Shiv Computer featuring distinct Admin and User dashboards, application management, services, multilingual support, and dark/light modes." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,29 @@
         if (savedTheme === 'dark') {
           document.documentElement.classList.add('dark', 'dark-mode');
         }
+      } catch (e) {}
+
+      // Disable two-finger pinch-to-zoom on mobile devices while preserving normal scrolling & responsiveness
+      try {
+        // Prevent multi-touch pinch-to-zoom (when 2 or more fingers touch the screen)
+        document.addEventListener('touchmove', function(e) {
+          if (e.touches && e.touches.length > 1) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+
+        // Prevent iOS Safari gesture-based pinch zoom
+        document.addEventListener('gesturestart', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('gesturechange', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('gestureend', function(e) {
+          e.preventDefault();
+        }, { passive: false });
       } catch (e) {}
     </script>
   </head>
