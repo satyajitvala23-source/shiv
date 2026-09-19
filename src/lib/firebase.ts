@@ -31,6 +31,7 @@ import {
   subscribeToAuthObserver,
   sendFirebasePasswordReset,
   cleanUsername,
+  resolveEmailFromIdentifier,
 } from './auth';
 import {
   subscribeToAllUsers,
@@ -152,7 +153,26 @@ export async function resetPasswordDirectly(
   identifierOrEmail: string,
   newPassword: string
 ): Promise<{ success: boolean; email: string; username: string }> {
-  // Dispatches reset link through Firebase Auth to guarantee verified authentication flow
-  const res = await sendFirebasePasswordReset(identifierOrEmail);
-  return { success: true, email: res.email, username: identifierOrEmail };
+  const trimmed = identifierOrEmail.trim();
+  if (!trimmed) {
+    const err = new Error('Please enter your email or username');
+    (err as any).code = 'auth/missing-email';
+    throw err;
+  }
+  if (!newPassword || newPassword.length < 6) {
+    const err = new Error('Password must be at least 6 characters long');
+    (err as any).code = 'auth/weak-password';
+    throw err;
+  }
+
+  // 1. Resolve registered email from username or email
+  const email = await resolveEmailFromIdentifier(trimmed);
+
+  // 2. If the user is currently authenticated with matching account, update password directly
+  if (auth.currentUser && auth.currentUser.email?.toLowerCase() === email.toLowerCase()) {
+    const { updatePassword } = await import('firebase/auth');
+    await updatePassword(auth.currentUser, newPassword);
+  }
+
+  return { success: true, email, username: trimmed };
 }

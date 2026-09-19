@@ -73,7 +73,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationStrings> = {
     },
     forgotPasswordModal: {
       title: 'Reset Password',
-      subtitle: 'Enter your registered email address or username to receive a secure Firebase password reset email link.',
+      subtitle: 'Enter your registered email address or username and your new password to set your password directly.',
       inputLabel: 'Registered Email or Username',
       inputPlaceholder: 'e.g. rahul@gmail.com or username',
       sendButton: 'Send Password Reset Link',
@@ -198,7 +198,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationStrings> = {
     },
     forgotPasswordModal: {
       title: 'પાસવર્ડ રીસેટ કરો',
-      subtitle: 'તમારા નોંધાયેલ ઈમેલ અથવા યુઝરનેમ દાખલ કરો જેથી ફાયરબેઝ દ્વારા સુરક્ષિત પાસવર્ડ રીસેટ લિંક મોકલી શકાય.',
+      subtitle: 'તમારો નવો પાસવર્ડ સીધો સેટ કરવા માટે તમારો રજિસ્ટર્ડ ઈમેલ અથવા યુઝરનેમ અને નવો પાસવર્ડ દાખલ કરો.',
       inputLabel: 'નોંધાયેલ ઈમેલ અથવા યુઝરનેમ',
       inputPlaceholder: 'દા.ત. rahul@gmail.com અથવા યુઝરનેમ',
       sendButton: 'પાસવર્ડ રીસેટ લિંક મોકલો',
@@ -323,7 +323,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationStrings> = {
     },
     forgotPasswordModal: {
       title: 'पासवर्ड रीसेट करें',
-      subtitle: 'अपना पंजीकृत ईमेल पता या यूज़रनेम दर्ज करें जिससे फायरबेस द्वारा सुरक्षित पासवर्ड रीसेट लिंक भेजा जा सके।',
+      subtitle: 'अपना नया पासवर्ड सीधे सेट करने के लिए अपना पंजीकृत ईमेल या यूज़रनेम और नया पासवर्ड दर्ज करें।',
       inputLabel: 'पंजीकृत ईमेल या यूज़रनेम',
       inputPlaceholder: 'उदा. rahul@gmail.com या यूज़रनेम',
       sendButton: 'पासवर्ड रीसेट लिंक भेजें',
