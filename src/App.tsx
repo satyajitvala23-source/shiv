@@ -16,6 +16,9 @@ function AppContent() {
     setLanguage,
     t,
     loginAs,
+    isAuthenticated,
+    authRole,
+    authLoading,
   } = useApp();
 
   // Dedicated Firebase Auth Forgot Password Modal
@@ -34,13 +37,84 @@ function AppContent() {
     setHomeModalOpen(true);
   };
 
-  // 1. STRICT ROLE ENFORCEMENT: If in Admin Dashboard view, render ONLY Admin Dashboard
+  // If Firebase Auth observer is initially resolving session
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-9 h-9 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-semibold tracking-wider uppercase text-slate-500">Loading Shiv Portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 1. STRICT ROLE ENFORCEMENT: Admin Dashboard view
+  // Verify Firebase Auth & Admin Role. Deny access and redirect to login if unauthorized.
   if (currentView === 'admin-dashboard') {
+    if (!isAuthenticated || authRole !== 'admin') {
+      return (
+        <div
+          id="shiv-computer-app-root"
+          className="min-h-screen w-full flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white relative overflow-x-hidden selection:bg-blue-600 selection:text-white"
+        >
+          <HeaderControls
+            role="admin"
+            onRoleChange={setSelectedRole}
+            language={language}
+            onLanguageChange={setLanguage}
+            adminLabel={t.adminRole}
+            userLabel={t.userRole}
+          />
+          <main
+            id="login-main-content"
+            className="flex-1 flex items-center justify-center py-6 sm:py-10 z-10"
+          >
+            <LoginForm
+              role="admin"
+              t={t}
+              onForgotPasswordClick={handleForgotPassword}
+              onBackToHomeClick={handleBackToHome}
+              onLoginSuccess={(role) => loginAs(role)}
+            />
+          </main>
+        </div>
+      );
+    }
     return <AdminDashboard />;
   }
 
-  // 2. STRICT ROLE ENFORCEMENT: If in User Dashboard view, render ONLY User Dashboard
+  // 2. STRICT ROLE ENFORCEMENT: User Dashboard view
   if (currentView === 'user-dashboard') {
+    if (!isAuthenticated) {
+      return (
+        <div
+          id="shiv-computer-app-root"
+          className="min-h-screen w-full flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white relative overflow-x-hidden selection:bg-blue-600 selection:text-white"
+        >
+          <HeaderControls
+            role="user"
+            onRoleChange={setSelectedRole}
+            language={language}
+            onLanguageChange={setLanguage}
+            adminLabel={t.adminRole}
+            userLabel={t.userRole}
+          />
+          <main
+            id="login-main-content"
+            className="flex-1 flex items-center justify-center py-6 sm:py-10 z-10"
+          >
+            <LoginForm
+              role="user"
+              t={t}
+              onForgotPasswordClick={handleForgotPassword}
+              onBackToHomeClick={handleBackToHome}
+              onLoginSuccess={(role) => loginAs(role)}
+            />
+          </main>
+        </div>
+      );
+    }
     return <UserDashboard />;
   }
 

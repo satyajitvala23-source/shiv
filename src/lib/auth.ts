@@ -17,6 +17,7 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  sendEmailVerification,
   User as FirebaseUser,
   updateProfile,
 } from 'firebase/auth';
@@ -214,6 +215,13 @@ export async function registerCitizen(
     // ignore
   }
 
+  // Send Firebase Email Verification
+  try {
+    await sendEmailVerification(fbUser);
+  } catch (evErr) {
+    console.warn('[Firebase Auth] Email verification dispatch deferred:', evErr);
+  }
+
   const newProfile: CustomerUser = {
     id: fbUser.uid,
     name: params.name.trim(),
@@ -228,12 +236,23 @@ export async function registerCitizen(
     totalPaid: 0,
   };
 
-  // Write to Firestore "users" and "usernames"
+  // Write non-sensitive profile info to Firestore "users" and "usernames"
+  // Note: User passwords are NEVER stored in Firestore or frontend storage.
   try {
     await setDoc(doc(db, USERS_COLLECTION, fbUser.uid), {
-      ...newProfile,
+      uid: fbUser.uid,
+      name: newProfile.name,
+      email: newProfile.email,
+      phone: newProfile.phone,
+      role: 'user',
+      username: normalizedUsername,
+      address: newProfile.address,
+      status: 'Active',
+      joinedDate: newProfile.joinedDate,
+      totalApplications: 0,
+      totalPaid: 0,
       createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     await setDoc(doc(db, USERNAMES_COLLECTION, normalizedUsername), {
@@ -248,6 +267,17 @@ export async function registerCitizen(
   }
 
   return newProfile;
+}
+
+/**
+ * Resend Email Verification link via Firebase Authentication
+ */
+export async function resendVerificationEmail(): Promise<void> {
+  if (auth.currentUser) {
+    await sendEmailVerification(auth.currentUser);
+  } else {
+    throw new Error('No user is currently signed in to resend verification.');
+  }
 }
 
 /**
@@ -339,8 +369,26 @@ export function subscribeToAuthObserver(
 
       onStateChanged(profile, isAdmin ? 'admin' : 'user');
     } catch (err) {
-      console.warn('[Auth Observer] Error verifying user profile:', err);
-      onStateChanged(null, null);
+      console.warn('[Auth Observer] Firestore unavailable or network delayed, using auth fallback:', err);
+      const isAdminFallback =
+        fbUser.email === 'satyajitvala23@gmail.com' ||
+        fbUser.email === 'admin@shivcomputer.com' ||
+        fbUser.email === 'satu@shivcomputer.com';
+
+      const fallbackProfile: CustomerUser = {
+        id: fbUser.uid,
+        name: fbUser.displayName || (isAdminFallback ? 'Shiv Master Administrator' : 'User'),
+        username: fbUser.email ? fbUser.email.split('@')[0] : 'user',
+        email: fbUser.email || '',
+        phone: '',
+        address: '',
+        role: isAdminFallback ? 'admin' : 'user',
+        status: 'Active',
+        joinedDate: new Date().toISOString().split('T')[0],
+        totalApplications: 0,
+        totalPaid: 0,
+      };
+      onStateChanged(fallbackProfile, isAdminFallback ? 'admin' : 'user');
     }
   });
 }

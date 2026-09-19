@@ -122,6 +122,38 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         text: t.errors.emailAlreadyRegistered,
       };
     }
+    if (code === 'auth/user-not-found') {
+      return {
+        title: language === 'gu' ? 'ખાતું મળ્યું નથી' : 'Account Not Found',
+        text: language === 'gu'
+          ? 'આ ઈમેલ અથવા યુઝરનેમ સાથે કોઈ ખાતું મળ્યું નથી. કૃપા કરીને પહેલા રજીસ્ટ્રેશન કરો.'
+          : 'No registered account found with this email or username. Please register first.',
+      };
+    }
+    if (code === 'auth/network-request-failed') {
+      return {
+        title: language === 'gu' ? 'નેટવર્ક સમસ્યા' : 'Network Error',
+        text: language === 'gu'
+          ? 'નેટવર્ક કનેક્શન સમસ્યા. કૃપા કરીને તમારું ઇન્ટરનેટ તપાસો.'
+          : 'Network connection problem. Please verify your internet connection.',
+      };
+    }
+    if (code === 'permission-denied' || code === 'auth/permission-denied') {
+      return {
+        title: language === 'gu' ? 'પરવાનગી નકારી' : 'Permission Denied',
+        text: language === 'gu'
+          ? 'તમારી પાસે આ ઓપરેશન કરવાની પરવાનગી નથી.'
+          : 'Permission denied. You do not have authorization for this operation.',
+      };
+    }
+    if (code === 'unavailable') {
+      return {
+        title: language === 'gu' ? 'સર્વિસ ઉપલબ્ધ નથી' : 'Service Unavailable',
+        text: language === 'gu'
+          ? 'ફાયરબેઝ સેવા અસ્થાયી રૂપે ઉપલબ્ધ નથી. કૃપા કરીને થોડીવાર પછી પ્રયાસ કરો.'
+          : 'Firebase service is temporarily unavailable. Please try again shortly.',
+      };
+    }
     if (code === 'auth/invalid-email') {
       return {
         title: language === 'gu' ? 'અમાન્ય ઈમેલ' : 'Invalid Email',

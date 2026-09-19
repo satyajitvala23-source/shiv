@@ -18,21 +18,26 @@ export const app: FirebaseApp = getApps().length > 0 ? getApp() : initializeApp(
 // Initialize Firebase Authentication instance
 export const auth: Auth = getAuth(app);
 
-// Initialize Cloud Firestore with explicit named database ID and force long polling
-// (Bypasses streaming proxy buffering in cloud sandboxes and iframe preview environments)
+// Initialize Cloud Firestore with explicit named database ID and auto-detect long polling
+// This allows standard WebSockets/streams while smoothly falling back to long-polling only when needed
 let firestoreDb: Firestore;
 try {
   firestoreDb = initializeFirestore(
     app,
     {
-      experimentalForceLongPolling: true,
+      experimentalAutoDetectLongPolling: true,
     },
     firebaseConfig.firestoreDatabaseId
   );
 } catch {
-  firestoreDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
-    ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
-    : getFirestore(app);
+  try {
+    firestoreDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
+      ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+      : getFirestore(app);
+  } catch (err) {
+    console.warn('[Firebase] Fallback Firestore initialization error:', err);
+    firestoreDb = getFirestore(app);
+  }
 }
 
 export const db: Firestore = firestoreDb;

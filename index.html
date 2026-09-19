@@ -20,26 +20,51 @@
         }
       } catch (e) {}
 
-      // Disable two-finger pinch-to-zoom on mobile devices while preserving normal scrolling & responsiveness
+      // Desktop Browser Zoom Prevention:
+      // Prevents accidental browser zooming (Ctrl+Wheel, Ctrl++, Ctrl+-, Ctrl+0, Cmd equivalents)
+      // while strictly preserving normal mouse-wheel scrolling, touch navigation, and text selection.
       try {
-        // Prevent multi-touch pinch-to-zoom (when 2 or more fingers touch the screen)
+        var onWheel = function(e) {
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+          }
+        };
+
+        var onKeyDown = function(e) {
+          if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+            var key = e.key;
+            var code = e.code;
+            var keyCode = e.keyCode || e.which;
+
+            var isZoomIn = key === '+' || key === '=' || code === 'Equal' || code === 'NumpadAdd' || keyCode === 187 || keyCode === 107;
+            var isZoomOut = key === '-' || key === '_' || code === 'Minus' || code === 'NumpadSubtract' || keyCode === 189 || keyCode === 109;
+            var isZoomReset = key === '0' || code === 'Digit0' || code === 'Numpad0' || keyCode === 48 || keyCode === 96;
+
+            if (isZoomIn || isZoomOut || isZoomReset) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }
+        };
+
+        window.addEventListener('wheel', onWheel, { passive: false });
+        document.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('keydown', onKeyDown, { capture: true });
+        document.addEventListener('keydown', onKeyDown, { capture: true });
+
+        // Prevent gesture pinch-to-zoom on desktop Safari trackpad & iOS
+        var onGesture = function(e) { e.preventDefault(); };
+        document.addEventListener('gesturestart', onGesture, { passive: false });
+        document.addEventListener('gesturechange', onGesture, { passive: false });
+        document.addEventListener('gestureend', onGesture, { passive: false });
+      } catch (e) {}
+
+      // Multi-touch pinch zoom prevention for mobile touch devices
+      try {
         document.addEventListener('touchmove', function(e) {
           if (e.touches && e.touches.length > 1) {
             e.preventDefault();
           }
-        }, { passive: false });
-
-        // Prevent iOS Safari gesture-based pinch zoom
-        document.addEventListener('gesturestart', function(e) {
-          e.preventDefault();
-        }, { passive: false });
-
-        document.addEventListener('gesturechange', function(e) {
-          e.preventDefault();
-        }, { passive: false });
-
-        document.addEventListener('gestureend', function(e) {
-          e.preventDefault();
         }, { passive: false });
       } catch (e) {}
     </script>

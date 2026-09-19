@@ -59,7 +59,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationStrings> = {
       confirmPasswordRequired: 'Please confirm your password.',
       passwordsDoNotMatch: 'Passwords do not match.',
       usernameTaken: 'This username is already taken. Please choose another.',
-      emailAlreadyRegistered: 'This email is already registered. Please sign in.',
+      emailAlreadyRegistered: 'This email is already registered. Please login instead.',
     },
     simulations: {
       loginSuccessTitle: 'Role Verified',

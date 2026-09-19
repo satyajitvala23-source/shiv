@@ -2,6 +2,10 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { setupDesktopZoomPrevention } from './lib/preventDesktopZoom';
+
+// Initialize desktop browser zoom prevention (Ctrl+Wheel, Ctrl++, Ctrl+-, Ctrl+0, trackpad pinch)
+setupDesktopZoomPrevention();
 
 // Prevent multi-finger pinch-to-zoom on mobile devices while maintaining standard single-finger scrolling
 if (typeof window !== 'undefined') {

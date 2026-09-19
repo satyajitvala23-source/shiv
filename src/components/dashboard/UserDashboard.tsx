@@ -33,7 +33,7 @@ import { Application, ApplicationStatus, FormTemplate, ServiceItem } from '../..
 import { DashboardHeader } from './DashboardHeader';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplyServiceModal } from './ApplyServiceModal';
-import { sendPasswordReset } from '../../lib/firebase';
+import { sendPasswordReset, resendVerificationEmail, auth } from '../../lib/firebase';
 
 type UserTab =
   | 'dashboard'
@@ -114,6 +114,19 @@ export const UserDashboard: React.FC = () => {
   const [inquirySubject, setInquirySubject] = useState('');
   const [inquiryMessage, setInquiryMessage] = useState('');
   const [inquirySent, setInquirySent] = useState(false);
+
+  // Email verification state (Requirement 14)
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  const handleResendVerification = async () => {
+    setResendStatus('sending');
+    try {
+      await resendVerificationEmail();
+      setResendStatus('sent');
+    } catch {
+      setResendStatus('error');
+    }
+  };
 
   // Counts for user
   const totalUserApps = userApplications.length;
@@ -277,6 +290,50 @@ export const UserDashboard: React.FC = () => {
 
         {/* Main View Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {/* Email Verification Banner (Requirement 14) */}
+          {auth.currentUser && !auth.currentUser.emailVerified && (
+            <div
+              id="user-email-verification-banner"
+              className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs sm:text-sm font-bold">
+                    Email Verification Required
+                  </div>
+                  <p className="text-xs text-amber-800 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                    A Firebase verification email was dispatched to{' '}
+                    <span className="font-semibold">{currentUser.email || auth.currentUser.email}</span>.
+                    Please verify your email address to ensure seamless certificate issuance.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  id="resend-verification-email-btn"
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === 'sending' || resendStatus === 'sent'}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+                >
+                  {resendStatus === 'sending' ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : resendStatus === 'sent' ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Verification Sent!</span>
+                    </>
+                  ) : (
+                    <span>Resend Verification Email</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
           {/* TAB 1: USER DASHBOARD OVERVIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
