@@ -251,3 +251,25 @@ export interface TranslationStrings {
     logout: string;
   };
 }
+
+export interface FormSubmission {
+  id?: string;
+  submissionId: string;
+  userId: string;
+  name: string;
+  phone: string;
+  email: string;
+  formType: string;
+  formData: Record<string, any>;
+  status: 'pending' | 'processing' | 'completed' | 'approved' | 'rejected' | ApplicationStatus;
+  createdAt: any;
+  updatedAt: any;
+  adminNotes?: string;
+}
+
+export interface AdminRecord {
+  uid: string;
+  email: string;
+  role: 'admin';
+  createdAt: any;
+}

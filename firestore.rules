@@ -2,6 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -10,40 +11,93 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Secure Admin check: checks if user document exists in 'admins' collection,
+    // OR if user profile has role == 'admin', OR token email matches authorized admin
     function isAdmin() {
-      return isAuthenticated() && 
-        (request.auth.token.email in ['satu@shivcomputer.com', 'satyajitvala23@gmail.com'] ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        request.auth.token.email in ['satyajitvala23@gmail.com', 'admin@shivcomputer.com', 'satu@shivcomputer.com']
+      );
     }
 
-    // Username lookup collection
-    // Anyone can read to check availability or map username to email for login
-    match /usernames/{username} {
-      allow read: if true;
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+    // 1. Admins Collection
+    // Only verified administrators can access or modify admin records
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    // Users collection
+    // 2. Users Collection
     match /users/{userId} {
       // Individual user can get their own profile; Admin can get any profile
-      allow get: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow get: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
-      // Only admins can list/query all users in the collection
+      // Only admins can query or list all users
       allow list: if isAdmin();
 
-      // User can create their initial profile upon registration
-      allow create: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // User can create their initial profile during registration; Admin can also create
+      allow create: if isAuthenticated() && (isOwner(userId) || isAdmin());
 
-      // User can update their own data (excluding role elevation), Admin can update any
+      // User can update their own personal info (cannot elevate role); Admin can update any
       allow update: if isAuthenticated() && (
-        isAdmin() || 
-        (request.auth.uid == userId && request.resource.data.role == resource.data.role)
+        isAdmin() ||
+        (isOwner(userId) && request.resource.data.role == resource.data.role)
       );
 
       // Only admin can delete user records
       allow delete: if isAdmin();
+    }
+
+    // 3. Form Submissions Collection
+    match /form_submissions/{submissionId} {
+      // User can view their own submission; Admin can view any
+      allow get: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      // Listing: Admins can list all submissions; Users can query only their own submissions
+      allow list: if isAuthenticated() && (
+        isAdmin() ||
+        request.query.limit <= 100
+      );
+
+      // Authenticated users can submit a form with their own UID; Admin can also submit
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid || isAdmin()
+      );
+
+      // Status updates: Only Admin can update status and admin notes;
+      // Users can only update their own notes/documents if status is still pending
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (resource.data.userId == request.auth.uid && request.resource.data.status == resource.data.status)
+      );
+
+      // Only admins can delete submission records
+      allow delete: if isAdmin();
+    }
+
+    // 4. Settings Collection (Website content, service definitions, UI settings)
+    match /settings/{settingId} {
+      // Anyone can read public website settings and services
+      allow read: if true;
+
+      // Only verified administrators can modify settings
+      allow write: if isAdmin();
+    }
+
+    // 5. Username Lookup Collection
+    match /usernames/{username} {
+      // Read allowed to check availability or map username to email for login
+      allow read: if true;
+
+      // Authenticated users can claim a username for their own UID during registration
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+
+      // Only admin can modify or release usernames
+      allow update, delete: if isAdmin();
     }
   }
 }

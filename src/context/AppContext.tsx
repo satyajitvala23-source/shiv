@@ -34,9 +34,17 @@ import {
   subscribeToUsers,
   updateUserStatus as updateFirestoreUserStatus,
   updateUserProfile as updateFirestoreUserProfile,
+  createFormSubmission,
+  subscribeToAllSubmissions,
+  subscribeToUserSubmissions,
+  updateSubmissionStatusDoc,
+  deleteSubmissionDoc,
+  subscribeToWebsiteSettings,
+  saveWebsiteSettingsDoc,
   LoginParams,
   RegisterParams,
 } from '../lib/firebase';
+import { FormSubmission } from '../types';
 
 interface AppContextType {
   currentView: CurrentView;
@@ -237,6 +245,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => unsubscribe();
   }, [isAuthenticated, authRole]);
+
+  // Helper to map Firestore form_submissions to Application type
+  const mapSubmissionToApplication = (sub: FormSubmission): Application => {
+    let dateStr = new Date().toISOString().split('T')[0];
+    if (sub.createdAt) {
+      try {
+        dateStr = sub.createdAt.toDate ? sub.createdAt.toDate().toISOString().split('T')[0] : dateStr;
+      } catch {
+        // ignore
+      }
+    }
+    let lastUpdatedStr = dateStr;
+    if (sub.updatedAt) {
+      try {
+        lastUpdatedStr = sub.updatedAt.toDate ? sub.updatedAt.toDate().toISOString().split('T')[0] : dateStr;
+      } catch {
+        // ignore
+      }
+    }
+
+    let normStatus: ApplicationStatus = 'Pending';
+    const stLower = (sub.status || '').toLowerCase();
+    if (stLower === 'completed') normStatus = 'Completed';
+    else if (stLower === 'approved') normStatus = 'Approved';
+    else if (stLower === 'processing') normStatus = 'Processing';
+    else if (stLower === 'rejected') normStatus = 'Rejected';
+    else if (stLower === 'document required') normStatus = 'Document Required';
+
+    return {
+      id: sub.submissionId || sub.id || `APP-${Date.now()}`,
+      serviceId: sub.formData?.serviceId || 'SRV-01',
+      serviceName: sub.formType || 'Citizen Service',
+      category: sub.formData?.category || 'general',
+      applicantId: sub.userId,
+      applicantName: sub.name,
+      applicantEmail: sub.email,
+      applicantPhone: sub.phone,
+      applicantAddress: sub.formData?.address || 'Keshod, Gujarat',
+      applicationDate: dateStr,
+      status: normStatus,
+      paymentStatus: sub.formData?.paymentStatus || 'Paid',
+      fee: Number(sub.formData?.fee) || 50,
+      requiredDocuments: sub.formData?.requiredDocuments || ['Aadhaar Card', 'Passport Photo'],
+      uploadedDocuments: sub.formData?.uploadedDocuments || [],
+      adminNotes: sub.adminNotes || sub.formData?.notes || '',
+      lastUpdated: lastUpdatedStr,
+    };
+  };
+
+  // 3. Real-time Submissions subscription from Firestore
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    if (authRole === 'admin') {
+      // Admin sees ALL submissions live
+      const unsubscribe = subscribeToAllSubmissions((subs) => {
+        if (subs && subs.length > 0) {
+          const mapped = subs.map(mapSubmissionToApplication);
+          setApplications(mapped);
+        }
+      });
+      return () => unsubscribe();
+    } else if (authRole === 'user' && currentUser?.id) {
+      // User sees ONLY their own submissions live
+      const unsubscribe = subscribeToUserSubmissions(currentUser.id, (subs) => {
+        if (subs && subs.length > 0) {
+          const mapped = subs.map(mapSubmissionToApplication);
+          setApplications(mapped);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [isAuthenticated, authRole, currentUser?.id]);
+
+  // 4. Real-time Website Settings from Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeToWebsiteSettings((remoteSettings) => {
+      if (remoteSettings && Object.keys(remoteSettings).length > 0) {
+        setWebsiteContent((prev) => ({ ...prev, ...remoteSettings }));
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // 3. Route Protection & Hash Synchronization
   useEffect(() => {
@@ -512,6 +603,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return app;
       })
     );
+
+    // Sync status and notes directly to Firestore form_submissions
+    updateSubmissionStatusDoc(id, status.toLowerCase(), adminNote)
+      .catch((err) => console.warn('[Firestore] updateSubmissionStatusDoc warning:', err));
   };
 
   const applyForService = (service: ServiceItem, applicantNotes?: string): Application => {
@@ -543,6 +638,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     setApplications((prev) => [newApp, ...prev]);
+
+    // Save to Firestore "form_submissions" collection
+    createFormSubmission({
+      submissionId: newId,
+      userId: currentUser.id,
+      name: currentUser.name,
+      phone: currentUser.phone || '+91 98790 00000',
+      email: currentUser.email,
+      formType: service.name,
+      formData: {
+        serviceId: service.id,
+        category: service.category,
+        fee: service.fee,
+        notes: applicantNotes || '',
+        address: currentUser.address || 'Keshod, Gujarat',
+        paymentStatus: 'Paid',
+        requiredDocuments: service.requiredDocuments,
+        uploadedDocuments: newApp.uploadedDocuments,
+      },
+      status: 'pending',
+    }).catch((err) => console.warn('[Firestore] createFormSubmission warning:', err));
 
     const newPayment: PaymentRecord = {
       id: `TXN-${Date.now().toString().slice(-6)}`,
@@ -660,6 +776,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Website Content
   const updateWebsiteContent = (updates: Partial<WebsiteContent>) => {
     setWebsiteContent((prev) => ({ ...prev, ...updates }));
+    saveWebsiteSettingsDoc(updates).catch((err) =>
+      console.warn('[Firestore] saveWebsiteSettingsDoc warning:', err)
+    );
   };
 
   return (

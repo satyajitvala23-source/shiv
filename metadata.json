@@ -1,6 +1,6 @@
 {
   "name": "Shiv Computer - Login",
-  "description": "Complete role-based frontend system for Shiv Computer featuring distinct Admin and User dashboards, application management, services, multilingual support, and dark/light modes.",
+  "description": "Complete role-based web portal for Shiv Computer fully integrated with the Shiv-ori Firebase project featuring Firebase Authentication, Firestore databases, real-time application tracking, and strict RBAC security.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

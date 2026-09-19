@@ -91,6 +91,107 @@
           "required": true
         }
       }
+    },
+    "FormSubmission": {
+      "name": "FormSubmission",
+      "path": "/form_submissions/{submissionId}",
+      "description": "Citizen service applications and form submissions",
+      "fields": {
+        "submissionId": {
+          "type": "string",
+          "description": "Unique submission identifier",
+          "required": true
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the applicant",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the applicant",
+          "required": true
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number",
+          "required": true
+        },
+        "email": {
+          "type": "string",
+          "description": "Applicant email address",
+          "required": true
+        },
+        "formType": {
+          "type": "string",
+          "description": "Type or service category of the form submitted",
+          "required": true
+        },
+        "formData": {
+          "type": "map",
+          "description": "Custom form data payload including notes and document references",
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the submission (pending, processing, completed, approved, rejected)",
+          "required": true
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "Creation timestamp",
+          "required": true
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "description": "Last update timestamp",
+          "required": true
+        }
+      }
+    },
+    "Setting": {
+      "name": "Setting",
+      "path": "/settings/{settingId}",
+      "description": "Global website configuration, contact info, and persistent settings",
+      "fields": {
+        "websiteContent": {
+          "type": "map",
+          "description": "Website texts, headers, contact info, and notices",
+          "required": false
+        },
+        "updatedAt": {
+          "type": "timestamp",
+          "description": "Timestamp of last modification",
+          "required": true
+        }
+      }
+    },
+    "Admin": {
+      "name": "Admin",
+      "path": "/admins/{adminId}",
+      "description": "Authorized administrators record for secure RBAC verification",
+      "fields": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the administrator",
+          "required": true
+        },
+        "email": {
+          "type": "string",
+          "description": "Administrator email address",
+          "required": true
+        },
+        "role": {
+          "type": "string",
+          "description": "Role string, set to 'admin'",
+          "required": true
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "Creation timestamp",
+          "required": true
+        }
+      }
     }
   },
   "indexes": []
