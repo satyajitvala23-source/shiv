@@ -1,6 +1,6 @@
 export type LoginRole = 'admin' | 'user';
 
-export type CurrentView = 'login' | 'admin-dashboard' | 'user-dashboard';
+export type CurrentView = 'admin-dashboard' | 'user-dashboard';
 
 export type LanguageCode = 'en' | 'gu' | 'hi';
 

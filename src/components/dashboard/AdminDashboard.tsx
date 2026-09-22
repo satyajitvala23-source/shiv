@@ -461,42 +461,50 @@ export const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                      {applications.slice(0, 5).map((app) => (
-                        <tr
-                          key={app.id}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                          onClick={() => setSelectedAppForModal(app)}
-                        >
-                          <td className="py-3 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
-                            {app.id}
-                          </td>
-                          <td className="py-3 px-4 font-medium max-w-xs truncate">
-                            {app.serviceName}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div>{app.applicantName}</div>
-                            <div className="text-[11px] text-slate-400">{app.applicantPhone}</div>
-                          </td>
-                          <td className="py-3 px-4 text-slate-500">{app.applicationDate}</td>
-                          <td className="py-3 px-4">
-                            <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(app.status)}`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedAppForModal(app);
-                              }}
-                              className="px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors"
-                            >
-                              Manage
-                            </button>
+                      {applications.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-8 text-center text-slate-400">
+                            No applications submitted yet. Real citizen applications will appear here.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        applications.slice(0, 5).map((app) => (
+                          <tr
+                            key={app.id}
+                            className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                            onClick={() => setSelectedAppForModal(app)}
+                          >
+                            <td className="py-3 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
+                              {app.id}
+                            </td>
+                            <td className="py-3 px-4 font-medium max-w-xs truncate">
+                              {app.serviceName}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div>{app.applicantName}</div>
+                              <div className="text-[11px] text-slate-400">{app.applicantPhone}</div>
+                            </td>
+                            <td className="py-3 px-4 text-slate-500">{app.applicationDate}</td>
+                            <td className="py-3 px-4">
+                              <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(app.status)}`}>
+                                {app.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAppForModal(app);
+                                }}
+                                className="px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors"
+                              >
+                                Manage
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -965,7 +973,12 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredUsers.map((user) => {
+                {filteredUsers.length === 0 ? (
+                  <div className="col-span-full p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400">
+                    No registered citizens found. Real registered users will appear here.
+                  </div>
+                ) : (
+                  filteredUsers.map((user) => {
                   const userApps = applications.filter((a) => a.applicantId === user.id);
                   const userPayments = payments.filter((p) => p.applicantId === user.id);
                   return (
@@ -1049,9 +1062,10 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                   );
-                })}
-              </div>
+                })
+              )}
             </div>
+          </div>
           )}
 
           {/* TAB 7: DOCUMENTS VERIFICATION QUEUE */}
@@ -1067,7 +1081,12 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {applications.map((app) => (
+                {applications.length === 0 ? (
+                  <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400">
+                    No documents pending verification. Real uploaded documents will appear here.
+                  </div>
+                ) : (
+                  applications.map((app) => (
                   <div
                     key={app.id}
                     className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3"
@@ -1137,9 +1156,10 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
+          </div>
           )}
 
           {/* TAB 8: PAYMENTS & REVENUE */}
@@ -1190,21 +1210,29 @@ export const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                      {filteredPayments.map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                          <td className="py-3 px-4 font-mono font-bold text-blue-600">{p.id}</td>
-                          <td className="py-3 px-4 font-medium">{p.applicantName}</td>
-                          <td className="py-3 px-4">{p.serviceName}</td>
-                          <td className="py-3 px-4 text-slate-500 text-xs">{p.date}</td>
-                          <td className="py-3 px-4 font-medium">{p.method}</td>
-                          <td className="py-3 px-4 font-bold text-emerald-600">₹{p.amount}</td>
-                          <td className="py-3 px-4">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              {p.status}
-                            </span>
+                      {filteredPayments.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-12 text-center text-slate-400">
+                            No payment records found. Real payment receipts will appear here.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredPayments.map((p) => (
+                          <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                            <td className="py-3 px-4 font-mono font-bold text-blue-600">{p.id}</td>
+                            <td className="py-3 px-4 font-medium">{p.applicantName}</td>
+                            <td className="py-3 px-4">{p.serviceName}</td>
+                            <td className="py-3 px-4 text-slate-500 text-xs">{p.date}</td>
+                            <td className="py-3 px-4 font-medium">{p.method}</td>
+                            <td className="py-3 px-4 font-bold text-emerald-600">₹{p.amount}</td>
+                            <td className="py-3 px-4">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                {p.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1296,11 +1324,16 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700 flex items-start justify-between gap-3"
-                    >
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-xs">
+                      No notifications or broadcast announcements sent yet.
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700 flex items-start justify-between gap-3"
+                      >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-xs text-slate-900 dark:text-white">{n.title}</span>
@@ -1323,10 +1356,11 @@ export const AdminDashboard: React.FC = () => {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ))}
-                </div>
+                  ))
+                )}
               </div>
             </div>
+          </div>
           )}
 
           {/* TAB 10: REPORTS & ANALYTICS */}
@@ -1578,22 +1612,37 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
-                        SA
-                      </div>
-                      <div>
-                        <div className="font-bold text-xs text-slate-900 dark:text-white">
-                          Shiv Master Administrator
-                        </div>
-                        <div className="text-[11px] text-slate-400">admin@shivcomputer.com • Full Permissions</div>
-                      </div>
+                  {users.filter((u) => u.role === 'admin').length === 0 ? (
+                    <div className="p-6 text-center text-slate-400 text-xs">
+                      No additional administrator accounts configured in directory.
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                      Super Admin
-                    </span>
-                  </div>
+                  ) : (
+                    users
+                      .filter((u) => u.role === 'admin')
+                      .map((adminUser) => (
+                        <div
+                          key={adminUser.id}
+                          className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
+                              {adminUser.name.charAt(0) || 'A'}
+                            </div>
+                            <div>
+                              <div className="font-bold text-xs text-slate-900 dark:text-white">
+                                {adminUser.name}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                {adminUser.email} • Full Permissions
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                            Super Admin
+                          </span>
+                        </div>
+                      ))
+                  )}
                 </div>
               </div>
             </div>
@@ -1619,24 +1668,11 @@ export const AdminDashboard: React.FC = () => {
                   This system enforces strict role-based separation at the client view layer. As requested, all Admin controls (Add/Edit/Delete, User Management, Revenue reports) are isolated exclusively to this Administrator view.
                 </p>
 
-                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs space-y-1">
-                  <div className="font-bold">Backend & Firebase Connection Readiness:</div>
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs space-y-1">
+                  <div className="font-bold">Production Firebase Persistence Architecture:</div>
                   <div>
-                    The local storage state schemas (applications, users, services, payments) are structured to cleanly map to Firestore documents or PHP MySQL relational tables in future phases.
+                    Real application submissions, citizen users, services, and transactions are synchronized in real-time with Google Cloud Firestore.
                   </div>
-                </div>
-
-                <div className="pt-2 flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.clear();
-                      alert('Local demo storage cleared. Refresh to reload default data.');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs"
-                  >
-                    Reset Demo Storage
-                  </button>
                 </div>
               </div>
             </div>

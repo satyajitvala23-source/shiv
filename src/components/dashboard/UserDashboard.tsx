@@ -291,7 +291,7 @@ export const UserDashboard: React.FC = () => {
         {/* Main View Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {/* Email Verification Banner (Requirement 14) */}
-          {auth.currentUser && !auth.currentUser.emailVerified && (
+          {auth?.currentUser && !auth.currentUser.emailVerified && (
             <div
               id="user-email-verification-banner"
               className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
@@ -304,7 +304,7 @@ export const UserDashboard: React.FC = () => {
                   </div>
                   <p className="text-xs text-amber-800 dark:text-amber-300/90 mt-0.5 leading-relaxed">
                     A Firebase verification email was dispatched to{' '}
-                    <span className="font-semibold">{currentUser.email || auth.currentUser.email}</span>.
+                    <span className="font-semibold">{currentUser.email || auth?.currentUser?.email}</span>.
                     Please verify your email address to ensure seamless certificate issuance.
                   </p>
                 </div>
@@ -344,7 +344,7 @@ export const UserDashboard: React.FC = () => {
                     Welcome back to Shiv Computer Portal
                   </div>
                   <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-                    Namaste, {currentUser.name}
+                    Namaste, {currentUser.name || 'Citizen'}
                   </h1>
                   <p className="text-xs text-blue-100 max-w-lg">
                     Manage your government certificates, agricultural subsidies, land records, and download official affidavit formats.
@@ -801,31 +801,37 @@ export const UserDashboard: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {userApplications.map((app) => (
-                    <div
-                      key={app.id}
-                      className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs font-bold text-blue-600">{app.id}</span>
-                          <span className="font-semibold text-xs text-slate-900 dark:text-white">{app.serviceName}</span>
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
-                          Currently has {app.uploadedDocuments.length} uploaded files
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedAppForModal(app)}
-                        className="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-semibold text-xs flex items-center gap-1.5 self-start sm:self-center"
-                      >
-                        <UploadCloud className="w-3.5 h-3.5" />
-                        <span>Manage & Upload Docs</span>
-                      </button>
+                  {userApplications.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-xs">
+                      No applications submitted yet. Apply for a service to upload documents.
                     </div>
-                  ))}
+                  ) : (
+                    userApplications.map((app) => (
+                      <div
+                        key={app.id}
+                        className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-blue-600">{app.id}</span>
+                            <span className="font-semibold text-xs text-slate-900 dark:text-white">{app.serviceName}</span>
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">
+                            Currently has {app.uploadedDocuments.length} uploaded files
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAppForModal(app)}
+                          className="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-semibold text-xs flex items-center gap-1.5 self-start sm:self-center"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Manage & Upload Docs</span>
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -844,73 +850,79 @@ export const UserDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {userApplications.map((app) => (
-                  <div
-                    key={app.id}
-                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                      <div>
-                        <span className="font-mono text-xs font-bold text-blue-600">{app.id}</span>
-                        <h3 className="font-bold text-base text-slate-900 dark:text-white">{app.serviceName}</h3>
-                      </div>
-                      <span className={`text-xs font-semibold px-3 py-1 rounded-full border self-start ${getStatusBadge(app.status)}`}>
-                        {app.status}
-                      </span>
-                    </div>
-
-                    {/* Progress steps */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-                      <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
-                        <div className="font-semibold text-emerald-800 dark:text-emerald-300">1. Submitted</div>
-                        <div className="text-[10px] text-slate-400">{app.applicationDate}</div>
-                      </div>
-
-                      <div className={`p-3 rounded-xl border ${
-                        app.status !== 'Pending'
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold'
-                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-                      }`}>
-                        <FileCheck className="w-4 h-4 mx-auto mb-1" />
-                        <div>2. Docs Verified</div>
-                        <div className="text-[10px] text-slate-400">{app.uploadedDocuments.length} docs</div>
-                      </div>
-
-                      <div className={`p-3 rounded-xl border ${
-                        app.status === 'Processing' || app.status === 'Approved' || app.status === 'Completed'
-                          ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 font-semibold'
-                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-                      }`}>
-                        <Clock className="w-4 h-4 mx-auto mb-1" />
-                        <div>3. Govt Processing</div>
-                        <div className="text-[10px] text-slate-400">Department</div>
-                      </div>
-
-                      <div className={`p-3 rounded-xl border ${
-                        app.status === 'Approved' || app.status === 'Completed'
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold'
-                          : app.status === 'Rejected'
-                          ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 font-semibold'
-                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-                      }`}>
-                        <Check className="w-4 h-4 mx-auto mb-1" />
-                        <div>4. Outcome</div>
-                        <div className="text-[10px] text-slate-400">{app.status}</div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedAppForModal(app)}
-                        className="text-xs font-semibold text-blue-600 hover:underline"
-                      >
-                        Inspect Application Documents & Remarks →
-                      </button>
-                    </div>
+                {userApplications.length === 0 ? (
+                  <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400">
+                    No active applications to track. Apply for a service to view live progress milestones.
                   </div>
-                ))}
+                ) : (
+                  userApplications.map((app) => (
+                    <div
+                      key={app.id}
+                      className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <div>
+                          <span className="font-mono text-xs font-bold text-blue-600">{app.id}</span>
+                          <h3 className="font-bold text-base text-slate-900 dark:text-white">{app.serviceName}</h3>
+                        </div>
+                        <span className={`text-xs font-semibold px-3 py-1 rounded-full border self-start ${getStatusBadge(app.status)}`}>
+                          {app.status}
+                        </span>
+                      </div>
+
+                      {/* Progress steps */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mx-auto mb-1" />
+                          <div className="font-semibold text-emerald-800 dark:text-emerald-300">1. Submitted</div>
+                          <div className="text-[10px] text-slate-400">{app.applicationDate}</div>
+                        </div>
+
+                        <div className={`p-3 rounded-xl border ${
+                          app.status !== 'Pending'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                        }`}>
+                          <FileCheck className="w-4 h-4 mx-auto mb-1" />
+                          <div>2. Docs Verified</div>
+                          <div className="text-[10px] text-slate-400">{app.uploadedDocuments.length} docs</div>
+                        </div>
+
+                        <div className={`p-3 rounded-xl border ${
+                          app.status === 'Processing' || app.status === 'Approved' || app.status === 'Completed'
+                            ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 font-semibold'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                        }`}>
+                          <Clock className="w-4 h-4 mx-auto mb-1" />
+                          <div>3. Govt Processing</div>
+                          <div className="text-[10px] text-slate-400">Department</div>
+                        </div>
+
+                        <div className={`p-3 rounded-xl border ${
+                          app.status === 'Approved' || app.status === 'Completed'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold'
+                            : app.status === 'Rejected'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 font-semibold'
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
+                        }`}>
+                          <Check className="w-4 h-4 mx-auto mb-1" />
+                          <div>4. Outcome</div>
+                          <div className="text-[10px] text-slate-400">{app.status}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAppForModal(app)}
+                          className="text-xs font-semibold text-blue-600 hover:underline"
+                        >
+                          Inspect Application Documents & Remarks →
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -994,27 +1006,33 @@ export const UserDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                {notifications
-                  .filter((n) => n.targetRole === 'all' || n.targetRole === 'user')
-                  .map((n) => (
-                    <div
-                      key={n.id}
-                      className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-start gap-3.5"
-                    >
-                      <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 shrink-0">
-                        <Bell className="w-5 h-5" />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">{n.title}</h4>
-                          <span className="text-[10px] text-slate-400">{n.date}</span>
+                {notifications.filter((n) => n.targetRole === 'all' || n.targetRole === 'user').length === 0 ? (
+                  <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400 text-xs">
+                    No announcements or notifications available at this time.
+                  </div>
+                ) : (
+                  notifications
+                    .filter((n) => n.targetRole === 'all' || n.targetRole === 'user')
+                    .map((n) => (
+                      <div
+                        key={n.id}
+                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-start gap-3.5"
+                      >
+                        <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 shrink-0">
+                          <Bell className="w-5 h-5" />
                         </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                          {n.message}
-                        </p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-sm text-slate-900 dark:text-white">{n.title}</h4>
+                            <span className="text-[10px] text-slate-400">{n.date}</span>
+                          </div>
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            {n.message}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                )}
               </div>
             </div>
           )}
