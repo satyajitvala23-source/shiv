@@ -1,6 +1,11 @@
 export type LoginRole = 'admin' | 'user';
 
-export type CurrentView = 'admin-dashboard' | 'user-dashboard';
+export type CurrentView =
+  | 'login'
+  | 'register'
+  | 'admin-login'
+  | 'admin-dashboard'
+  | 'user-dashboard';
 
 export type LanguageCode = 'en' | 'gu' | 'hi';
 
@@ -76,14 +81,17 @@ export interface FormTemplate {
 
 export interface CustomerUser {
   id: string;
+  uid?: string;
   name: string;
   username?: string;
   email: string;
+  mobile?: string;
   phone: string;
   address: string;
   role?: 'admin' | 'user';
   status: 'Active' | 'Inactive';
   joinedDate: string;
+  createdAt?: any;
   totalApplications: number;
   totalPaid: number;
 }
@@ -159,6 +167,8 @@ export interface TranslationStrings {
   usernamePlaceholder: string;
   emailLabel: string;
   emailPlaceholder: string;
+  mobileLabel: string;
+  mobilePlaceholder: string;
   confirmPasswordLabel: string;
   confirmPasswordPlaceholder: string;
   registerButton: string;
@@ -175,6 +185,8 @@ export interface TranslationStrings {
     nameRequired: string;
     usernameInvalid: string;
     emailInvalid: string;
+    mobileRequired: string;
+    mobileInvalid: string;
     confirmPasswordRequired: string;
     passwordsDoNotMatch: string;
     usernameTaken: string;

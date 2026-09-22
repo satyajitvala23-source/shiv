@@ -20,18 +20,28 @@ export const auth: Auth = getAuth(app);
 
 // Initialize Cloud Firestore with explicit named database ID and auto-detect long polling
 // This allows standard WebSockets/streams while smoothly falling back to long-polling only when needed
+const hasNamedDb = Boolean(
+  firebaseConfig.firestoreDatabaseId &&
+  firebaseConfig.firestoreDatabaseId !== '(default)' &&
+  firebaseConfig.firestoreDatabaseId.trim() !== ''
+);
+
 let firestoreDb: Firestore;
 try {
-  firestoreDb = initializeFirestore(
-    app,
-    {
-      experimentalAutoDetectLongPolling: true,
-    },
-    firebaseConfig.firestoreDatabaseId
-  );
+  firestoreDb = hasNamedDb
+    ? initializeFirestore(
+        app,
+        {
+          experimentalAutoDetectLongPolling: true,
+        },
+        firebaseConfig.firestoreDatabaseId
+      )
+    : initializeFirestore(app, {
+        experimentalAutoDetectLongPolling: true,
+      });
 } catch {
   try {
-    firestoreDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
+    firestoreDb = hasNamedDb
       ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
       : getFirestore(app);
   } catch (err) {

@@ -32,6 +32,7 @@ import {
   sendFirebasePasswordReset,
   cleanUsername,
   resolveEmailFromIdentifier,
+  formatAuthError,
 } from './auth';
 import {
   subscribeToAllUsers,
@@ -47,9 +48,10 @@ import { CustomerUser } from '../types';
 
 export interface RegisterParams {
   name: string;
-  username: string;
   email: string;
+  mobile: string;
   password: string;
+  username?: string;
   phone?: string;
   address?: string;
 }

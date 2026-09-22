@@ -16,6 +16,7 @@ import {
   AtSign,
   UserPlus,
   LogIn,
+  Phone,
 } from 'lucide-react';
 import { LoginRole, TranslationStrings } from '../types';
 import { BrandLogo } from './BrandLogo';
@@ -36,7 +37,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onBackToHomeClick,
   onLoginSuccess,
 }) => {
-  const { loginWithCredentials, registerNewUser, language } = useApp();
+  const { loginWithCredentials, registerNewUser, language, currentView, setCurrentView, setSelectedRole } = useApp();
 
   // Mode: 'login' | 'register' (Registration is available for citizens/users)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -47,8 +48,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   // Register Form Values
   const [regFullName, setRegFullName] = useState('');
-  const [regUsername, setRegUsername] = useState('');
   const [regEmail, setRegEmail] = useState('');
+  const [regMobile, setRegMobile] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
 
@@ -63,6 +64,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     title: string;
     text: string;
   } | null>(null);
+
+  // Sync authMode with currentView
+  useEffect(() => {
+    if (currentView === 'register') {
+      setAuthMode('register');
+    } else {
+      setAuthMode('login');
+    }
+  }, [currentView]);
 
   // When role changes, if Admin is selected, switch mode to 'login' and ensure no credentials prefill
   useEffect(() => {
@@ -259,14 +269,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       newErrors.name = t.errors.nameRequired;
     }
 
-    const cleanUser = regUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-    if (!cleanUser || cleanUser.length < 3 || cleanUser.length > 20) {
-      newErrors.username = t.errors.usernameInvalid;
-    }
-
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regEmail.trim() || !emailPattern.test(regEmail.trim())) {
       newErrors.email = t.errors.emailInvalid;
+    }
+
+    const cleanMobile = regMobile.trim().replace(/[^0-9]/g, '');
+    if (!cleanMobile) {
+      newErrors.mobile = t.errors.mobileRequired || 'Mobile number is required';
+    } else if (cleanMobile.length !== 10) {
+      newErrors.mobile = t.errors.mobileInvalid || 'Please enter a valid 10-digit mobile number';
     }
 
     if (!regPassword) {
@@ -289,8 +301,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     try {
       await registerNewUser({
         name: regFullName.trim(),
-        username: cleanUser,
         email: regEmail.trim().toLowerCase(),
+        mobile: cleanMobile,
         password: regPassword,
       });
 
@@ -380,6 +392,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               id="tab-sign-in"
               onClick={() => {
                 setAuthMode('login');
+                setCurrentView('login');
+                window.location.hash = '#/login';
                 setStatusMessage(null);
                 setErrors({});
               }}
@@ -397,6 +411,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               id="tab-sign-up"
               onClick={() => {
                 setAuthMode('register');
+                setCurrentView('register');
+                window.location.hash = '#/register';
                 setStatusMessage(null);
                 setErrors({});
               }}
@@ -599,12 +615,56 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   id="switch-to-signup-link"
                   onClick={() => {
                     setAuthMode('register');
+                    setCurrentView('register');
+                    window.location.hash = '#/register';
                     setStatusMessage(null);
                     setErrors({});
                   }}
                   className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
                 >
                   {t.signUpLink}
+                </button>
+              </div>
+            )}
+
+            {/* Quick Switch to Admin Portal */}
+            {role === 'user' && (
+              <div className="pt-2 text-center text-xs">
+                <button
+                  type="button"
+                  id="switch-to-admin-login-link"
+                  onClick={() => {
+                    setSelectedRole('admin');
+                    setCurrentView('admin-login');
+                    window.location.hash = '#/admin-login';
+                    setStatusMessage(null);
+                    setErrors({});
+                  }}
+                  className="font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+                  <span>{language === 'gu' ? 'એડમિન પોર્ટલ લોગિન' : 'Admin Access Portal'} &rarr;</span>
+                </button>
+              </div>
+            )}
+
+            {/* Quick Switch from Admin to Citizen Portal */}
+            {role === 'admin' && (
+              <div className="pt-2 text-center text-xs">
+                <button
+                  type="button"
+                  id="switch-to-citizen-login-link"
+                  onClick={() => {
+                    setSelectedRole('user');
+                    setCurrentView('login');
+                    window.location.hash = '#/login';
+                    setStatusMessage(null);
+                    setErrors({});
+                  }}
+                  className="font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors inline-flex items-center gap-1.5"
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>&larr; {language === 'gu' ? 'નાગરિક પોર્ટલ પર પાછા જાઓ' : 'Return to Citizen Portal'}</span>
                 </button>
               </div>
             )}
@@ -652,44 +712,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               )}
             </div>
 
-            {/* UNIQUE USERNAME */}
-            <div>
-              <label
-                htmlFor="reg-username-input"
-                className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1"
-              >
-                {t.usernameLabel}
-              </label>
-              <div className="relative rounded-xl shadow-xs">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <AtSign className="w-4 h-4" />
-                </div>
-                <input
-                  id="reg-username-input"
-                  name="username"
-                  type="text"
-                  value={regUsername}
-                  onChange={(e) => {
-                    setRegUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
-                    if (errors.username) setErrors((prev) => ({ ...prev, username: undefined }));
-                  }}
-                  placeholder={t.usernamePlaceholder}
-                  disabled={isLoading}
-                  className={`w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
-                    errors.username
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
-                  }`}
-                />
-              </div>
-              {errors.username && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>{errors.username}</span>
-                </p>
-              )}
-            </div>
-
             {/* EMAIL */}
             <div>
               <label
@@ -724,6 +746,46 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.email}</span>
+                </p>
+              )}
+            </div>
+
+            {/* MOBILE NUMBER */}
+            <div>
+              <label
+                htmlFor="reg-mobile-input"
+                className="block text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1"
+              >
+                {t.mobileLabel}
+              </label>
+              <div className="relative rounded-xl shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <input
+                  id="reg-mobile-input"
+                  name="mobile"
+                  type="tel"
+                  maxLength={10}
+                  value={regMobile}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setRegMobile(val);
+                    if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: undefined }));
+                  }}
+                  placeholder={t.mobilePlaceholder}
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
+                    errors.mobile
+                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                  }`}
+                />
+              </div>
+              {errors.mobile && (
+                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{errors.mobile}</span>
                 </p>
               )}
             </div>
@@ -847,6 +909,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 id="switch-to-signin-link"
                 onClick={() => {
                   setAuthMode('login');
+                  setCurrentView('login');
+                  window.location.hash = '#/login';
                   setStatusMessage(null);
                   setErrors({});
                 }}

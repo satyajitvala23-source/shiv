@@ -979,92 +979,92 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 ) : (
                   filteredUsers.map((user) => {
-                  const userApps = applications.filter((a) => a.applicantId === user.id);
-                  const userPayments = payments.filter((p) => p.applicantId === user.id);
-                  return (
-                    <div
-                      key={user.id}
-                      className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4"
-                    >
-                      <div>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-sm">
-                              {user.name.charAt(0)}
+                    const userApps = applications.filter((a) => a.applicantId === user.id);
+                    const userPayments = payments.filter((p) => p.applicantId === user.id);
+                    return (
+                      <div
+                        key={user.id}
+                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-sm">
+                                {user.name.charAt(0)}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                                    {user.name}
+                                  </h3>
+                                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
+                                    user.role === 'admin'
+                                      ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                  }`}>
+                                    {user.role === 'admin' ? 'Admin' : 'User'}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-slate-400 flex items-center gap-1 flex-wrap">
+                                  <span>{user.email}</span>
+                                  {user.username && (
+                                    <span className="font-mono text-blue-600 dark:text-blue-400 font-medium">
+                                      @{user.username}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleUserStatus(user.id)}
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${
+                                user.status === 'Active'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                  : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                              }`}
+                            >
+                              {user.status}
+                            </button>
+                          </div>
+
+                          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                            <div>Phone: {user.phone || 'Not provided'}</div>
+                            <div className="truncate">Address: {user.address || 'Keshod, Gujarat'}</div>
+                            <div className="text-[11px] text-slate-400">Registered: {user.joinedDate || 'Recently'}</div>
+                          </div>
+
+                          <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 grid grid-cols-2 gap-2 text-center text-xs">
+                            <div>
+                              <div className="text-slate-400 text-[10px]">Applications</div>
+                              <div className="font-bold text-slate-800 dark:text-slate-200">{userApps.length}</div>
                             </div>
                             <div>
-                              <div className="flex items-center gap-1.5">
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                                  {user.name}
-                                </h3>
-                                <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${
-                                  user.role === 'admin'
-                                    ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
-                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                                }`}>
-                                  {user.role === 'admin' ? 'Admin' : 'User'}
-                                </span>
-                              </div>
-                              <div className="text-[11px] text-slate-400 flex items-center gap-1 flex-wrap">
-                                <span>{user.email}</span>
-                                {user.username && (
-                                  <span className="font-mono text-blue-600 dark:text-blue-400 font-medium">
-                                    @{user.username}
-                                  </span>
-                                )}
-                              </div>
+                              <div className="text-slate-400 text-[10px]">Total Paid</div>
+                              <div className="font-bold text-emerald-600">₹{userPayments.reduce((a, c) => a + c.amount, 0)}</div>
                             </div>
                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                           <button
                             type="button"
-                            onClick={() => toggleUserStatus(user.id)}
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${
-                              user.status === 'Active'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-                            }`}
+                            onClick={() => {
+                              const newName = prompt('Update user full name:', user.name);
+                              if (newName && newName.trim()) {
+                                updateUser(user.id, { name: newName.trim() });
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                           >
-                            {user.status}
+                            Edit Info
                           </button>
                         </div>
-
-                        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-300">
-                          <div>Phone: {user.phone || 'Not provided'}</div>
-                          <div className="truncate">Address: {user.address || 'Keshod, Gujarat'}</div>
-                          <div className="text-[11px] text-slate-400">Registered: {user.joinedDate || 'Recently'}</div>
-                        </div>
-
-                        <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 grid grid-cols-2 gap-2 text-center text-xs">
-                          <div>
-                            <div className="text-slate-400 text-[10px]">Applications</div>
-                            <div className="font-bold text-slate-800 dark:text-slate-200">{userApps.length}</div>
-                          </div>
-                          <div>
-                            <div className="text-slate-400 text-[10px]">Total Paid</div>
-                            <div className="font-bold text-emerald-600">₹{userPayments.reduce((a, c) => a + c.amount, 0)}</div>
-                          </div>
-                        </div>
                       </div>
-
-                      <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newName = prompt('Update user full name:', user.name);
-                            if (newName && newName.trim()) {
-                              updateUser(user.id, { name: newName.trim() });
-                            }
-                          }}
-                          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        >
-                          Edit Info
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    );
+                  })
+                )}
+              </div>
           </div>
           )}
 

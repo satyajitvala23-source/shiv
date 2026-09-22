@@ -37,13 +37,16 @@ service cloud.firestore {
       // Only admins can query or list all users
       allow list: if isAdmin();
 
-      // User can create their initial profile during registration; Admin can also create
-      allow create: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      // User can create their initial profile during registration with role == 'user'; Admin can also create
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        (isOwner(userId) && request.resource.data.role == 'user' && request.resource.data.uid == userId)
+      );
 
-      // User can update their own personal info (cannot elevate role); Admin can update any
+      // User can update their own personal info (cannot change role); Admin can update any
       allow update: if isAuthenticated() && (
         isAdmin() ||
-        (isOwner(userId) && request.resource.data.role == resource.data.role)
+        (isOwner(userId) && request.resource.data.role == resource.data.role && resource.data.role == 'user')
       );
 
       // Only admin can delete user records

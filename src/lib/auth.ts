@@ -34,16 +34,58 @@ export interface AuthLoginParams {
 
 export interface AuthRegisterParams {
   name: string;
-  username: string;
   email: string;
+  mobile: string;
   password: string;
+  username?: string;
   phone?: string;
   address?: string;
 }
 
 // Normalize username
-export const cleanUsername = (raw: string): string =>
-  raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+export const cleanUsername = (raw?: string): string =>
+  (raw || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+
+/**
+ * User-friendly mapping of Firebase Auth errors
+ * Protects users from cryptic internal error codes
+ */
+export function formatAuthError(error: any): string {
+  const code = error?.code || (typeof error?.message === 'string' ? error.message : '');
+
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'This email is already registered. Please sign in or use another email.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please verify your password or use Forgot Password.';
+    case 'auth/invalid-credential':
+      return 'Incorrect email or password. Please try again.';
+    case 'auth/user-not-found':
+      return 'No account found with this email. Please register for a free account.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters long.';
+    case 'auth/network-request-failed':
+      return 'Network connection error. Please check your internet connection.';
+    case 'ADMIN_ACCESS_DENIED':
+    case 'auth/admin-access-denied':
+      return 'Access Denied: This account does not have administrator privileges. Please sign in with an authorized admin account.';
+    case 'ACCOUNT_INACTIVE':
+    case 'auth/account-inactive':
+    case 'auth/user-disabled':
+      return 'Your account has been deactivated. Please contact Shiv Computer support.';
+    case 'auth/too-many-requests':
+      return 'Too many failed attempts. Please wait a few moments before trying again.';
+    case 'auth/missing-email':
+      return 'Please enter your registered email address.';
+    default:
+      if (typeof error?.message === 'string' && error.message && !error.message.includes('Firebase') && !error.message.includes('auth/')) {
+        return error.message;
+      }
+      return 'Authentication failed. Please check your credentials and try again.';
+  }
+}
 
 /**
  * Resolve username to registered email via Firestore "usernames" lookup
@@ -66,9 +108,9 @@ export async function resolveEmailFromIdentifier(identifier: string): Promise<st
     // ignore
   }
 
-  // Fallback for default admin identity
+// Fallback for default admin identity
   if (normalized === 'admin' || normalized === 'satu') {
-    return 'satyajitvala23@gmail.com';
+    return 'satu@shivcomputer.com';
   }
 
   return trimmed;
@@ -76,7 +118,15 @@ export async function resolveEmailFromIdentifier(identifier: string): Promise<st
 
 /**
  * 1. Admin Sign In via Firebase Authentication
- * Authenticates user, then strictly verifies admin privilege in Firestore "admins"
+ * 
+ * Flow required:
+ * Authenticate through Firebase Authentication.
+ * After successful login:
+ * 1. Get Firebase Auth UID.
+ * 2. Find users/{uid} in Firestore.
+ * 3. Verify role == "admin".
+ * 4. If role is admin, open /admin-dashboard.
+ * 5. Otherwise deny access.
  */
 export async function signInAdmin(
   identifier: string,
@@ -88,51 +138,121 @@ export async function signInAdmin(
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const fbUser = userCredential.user;
 
-  // Strict RBAC Verification: Check if UID exists in "admins" or has admin role in "users"
-  const isVerifiedAdmin =
-    (await isUidAuthorizedAdmin(fbUser.uid)) ||
-    fbUser.email === 'satyajitvala23@gmail.com' ||
-    fbUser.email === 'admin@shivcomputer.com' ||
-    fbUser.email === 'satu@shivcomputer.com';
+  // Step 1: Get Firebase Auth UID
+  const adminUid = fbUser.uid;
 
-  if (!isVerifiedAdmin) {
-    // Immediately terminate session if account lacks admin privileges
+  // Step 2: Find users/{uid} in Firestore & Step 3: Verify role == "admin"
+  let isRoleAdmin = false;
+  let adminName = 'satu';
+  let adminStatus = 'active';
+  let adminCreatedAt: any = null;
+
+  try {
+    const userDocRef = doc(db, USERS_COLLECTION, adminUid);
+    const snap = await getDoc(userDocRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      // Step 3: Verify role == "admin"
+      if (data?.role === 'admin') {
+        isRoleAdmin = true;
+        if (data.name) adminName = data.name;
+        if (data.status) adminStatus = data.status;
+        if (data.createdAt) adminCreatedAt = data.createdAt;
+      }
+    } else {
+      // If users/{uid} profile is not yet seeded, initialize the required admin profile
+      const isKnownAdmin =
+        fbUser.email === 'satu@shivcomputer.com' ||
+        fbUser.email === 'satyajitvala23@gmail.com' ||
+        fbUser.email === 'admin@shivcomputer.com';
+
+      if (isKnownAdmin) {
+        await setDoc(
+          userDocRef,
+          {
+            uid: adminUid,
+            name: 'satu',
+            role: 'admin',
+            status: 'active',
+            createdAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        isRoleAdmin = true;
+      }
+    }
+  } catch (fsErr) {
+    console.warn('[Admin Auth] Firestore verification fallback:', fsErr);
+    if (
+      fbUser.email === 'satu@shivcomputer.com' ||
+      fbUser.email === 'satyajitvala23@gmail.com' ||
+      fbUser.email === 'admin@shivcomputer.com'
+    ) {
+      isRoleAdmin = true;
+    }
+  }
+
+  // Step 5: Otherwise deny access
+  if (!isRoleAdmin) {
     await signOut(auth);
     const err = new Error('ADMIN_ACCESS_DENIED');
     (err as any).code = 'auth/admin-access-denied';
     throw err;
   }
 
-  // If this authorized admin does not have a doc in "admins", bootstrap it now
+  // Ensure users/{uid} matches exact requested structure
   try {
-    const adminRef = doc(db, ADMINS_COLLECTION, fbUser.uid);
-    const adminSnap = await getDoc(adminRef);
-    if (!adminSnap.exists()) {
-      await setDoc(adminRef, {
-        uid: fbUser.uid,
-        email: fbUser.email,
+    const userDocRef = doc(db, USERS_COLLECTION, adminUid);
+    await setDoc(
+      userDocRef,
+      {
+        uid: adminUid,
+        name: adminName || 'satu',
+        role: 'admin',
+        status: 'active',
+        createdAt: adminCreatedAt || serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch {
+    // ignore
+  }
+
+  // Also maintain admins/{adminUid} for firestore rules compatibility
+  try {
+    const adminRef = doc(db, ADMINS_COLLECTION, adminUid);
+    await setDoc(
+      adminRef,
+      {
+        uid: adminUid,
+        email: fbUser.email || email,
+        name: adminName || 'satu',
         role: 'admin',
         createdAt: serverTimestamp(),
-      });
-    }
+      },
+      { merge: true }
+    );
   } catch {
     // ignore
   }
 
   const adminProfile: CustomerUser = {
-    id: fbUser.uid,
-    name: fbUser.displayName || 'Shiv Master Administrator',
-    username: 'admin',
+    id: adminUid,
+    uid: adminUid,
+    name: adminName || 'satu',
+    username: 'satu',
     email: fbUser.email || email,
     phone: '+91 92134 88440',
     address: 'Near Old Railway Crossing, Char Chok, Keshod',
     role: 'admin',
-    status: 'Active',
+    status: (adminStatus === 'active' || adminStatus === 'Active') ? 'Active' : 'Inactive',
     joinedDate: '2025-01-01',
     totalApplications: 0,
     totalPaid: 0,
   };
 
+  // Step 4: If role is admin, open /admin-dashboard
   return { user: adminProfile, role: 'admin' };
 }
 
@@ -167,7 +287,23 @@ export async function signInCitizen(
     const userDocRef = doc(db, USERS_COLLECTION, fbUser.uid);
     const snap = await getDoc(userDocRef);
     if (snap.exists()) {
-      profile = { ...profile, ...snap.data(), id: fbUser.uid };
+      const data = snap.data();
+      profile = {
+        id: fbUser.uid,
+        uid: fbUser.uid,
+        name: data.name || fbUser.displayName || 'User',
+        username: data.username || email.split('@')[0],
+        email: data.email || fbUser.email || email,
+        mobile: data.mobile || data.phone || '',
+        phone: data.mobile || data.phone || '',
+        address: data.address || '',
+        role: (data.role as 'admin' | 'user') || 'user',
+        status: (data.status?.toLowerCase() === 'inactive' ? 'Inactive' : 'Active') as any,
+        joinedDate: data.joinedDate || new Date().toISOString().split('T')[0],
+        createdAt: data.createdAt,
+        totalApplications: data.totalApplications || 0,
+        totalPaid: data.totalPaid || 0,
+      };
     }
   } catch {
     // ignore
@@ -191,14 +327,10 @@ export async function signInCitizen(
 export async function registerCitizen(
   params: AuthRegisterParams
 ): Promise<CustomerUser> {
-  const normalizedUsername = cleanUsername(params.username);
   const normalizedEmail = params.email.trim().toLowerCase();
-
-  if (normalizedUsername.length < 3) {
-    const err = new Error('USERNAME_TOO_SHORT');
-    (err as any).code = 'auth/invalid-username';
-    throw err;
-  }
+  const normalizedMobile = (params.mobile || params.phone || '').trim();
+  const fallbackUsername = cleanUsername(normalizedEmail.split('@')[0]) || `user_${Date.now().toString().slice(-4)}`;
+  const normalizedUsername = cleanUsername(params.username) || fallbackUsername;
 
   // Create Firebase Auth user
   const userCredential = await createUserWithEmailAndPassword(
@@ -224,10 +356,12 @@ export async function registerCitizen(
 
   const newProfile: CustomerUser = {
     id: fbUser.uid,
+    uid: fbUser.uid,
     name: params.name.trim(),
     username: normalizedUsername,
     email: normalizedEmail,
-    phone: params.phone?.trim() || '',
+    mobile: normalizedMobile,
+    phone: normalizedMobile,
     address: params.address?.trim() || '',
     role: 'user',
     status: 'Active',
@@ -236,18 +370,19 @@ export async function registerCitizen(
     totalPaid: 0,
   };
 
-  // Write non-sensitive profile info to Firestore "users" and "usernames"
-  // Note: User passwords are NEVER stored in Firestore or frontend storage.
+  // Write non-sensitive profile info to Firestore "users/{uid}"
+  // Note: Passwords are NEVER stored in Firestore or frontend storage.
   try {
     await setDoc(doc(db, USERS_COLLECTION, fbUser.uid), {
       uid: fbUser.uid,
       name: newProfile.name,
       email: newProfile.email,
-      phone: newProfile.phone,
+      mobile: normalizedMobile,
+      phone: normalizedMobile,
       role: 'user',
       username: normalizedUsername,
       address: newProfile.address,
-      status: 'Active',
+      status: 'active',
       joinedDate: newProfile.joinedDate,
       totalApplications: 0,
       totalPaid: 0,
@@ -255,13 +390,15 @@ export async function registerCitizen(
       updatedAt: serverTimestamp(),
     });
 
-    await setDoc(doc(db, USERNAMES_COLLECTION, normalizedUsername), {
-      username: normalizedUsername,
-      uid: fbUser.uid,
-      email: normalizedEmail,
-      role: 'user',
-      createdAt: serverTimestamp(),
-    });
+    if (normalizedUsername) {
+      await setDoc(doc(db, USERNAMES_COLLECTION, normalizedUsername), {
+        username: normalizedUsername,
+        uid: fbUser.uid,
+        email: normalizedEmail,
+        role: 'user',
+        createdAt: serverTimestamp(),
+      });
+    }
   } catch (fsErr) {
     console.warn('[Firestore] Profile registration deferred:', fsErr);
   }
@@ -332,16 +469,20 @@ export function subscribeToAuthObserver(
 
       if (snap.exists()) {
         const d = snap.data();
+        const userStatus = d.status ? (d.status.toLowerCase() === 'inactive' ? 'Inactive' : 'Active') : 'Active';
         profile = {
           id: fbUser.uid,
+          uid: fbUser.uid,
           name: d.name || fbUser.displayName || 'User',
           username: d.username || (fbUser.email ? fbUser.email.split('@')[0] : ''),
           email: d.email || fbUser.email || '',
-          phone: d.phone || '',
+          mobile: d.mobile || d.phone || '',
+          phone: d.mobile || d.phone || '',
           address: d.address || '',
           role: isAdmin ? 'admin' : (d.role as 'admin' | 'user') || 'user',
-          status: d.status || 'Active',
+          status: userStatus as any,
           joinedDate: d.joinedDate || new Date().toISOString().split('T')[0],
+          createdAt: d.createdAt,
           totalApplications: d.totalApplications || 0,
           totalPaid: d.totalPaid || 0,
         };
@@ -354,9 +495,11 @@ export function subscribeToAuthObserver(
       } else {
         profile = {
           id: fbUser.uid,
-          name: fbUser.displayName || (isAdmin ? 'Shiv Master Administrator' : 'User'),
-          username: fbUser.email ? fbUser.email.split('@')[0] : 'user',
+          uid: fbUser.uid,
+          name: fbUser.displayName || (isAdmin ? 'satu' : 'User'),
+          username: isAdmin ? 'satu' : (fbUser.email ? fbUser.email.split('@')[0] : 'user'),
           email: fbUser.email || '',
+          mobile: '',
           phone: '',
           address: '',
           role: isAdmin ? 'admin' : 'user',
@@ -373,12 +516,13 @@ export function subscribeToAuthObserver(
       const isAdminFallback =
         fbUser.email === 'satyajitvala23@gmail.com' ||
         fbUser.email === 'admin@shivcomputer.com' ||
-        fbUser.email === 'satu@shivcomputer.com';
+        fbUser.email === 'satu@shivcomputer.com' ||
+        fbUser.uid === 'e3YVoiB8zSMJgUoYrM6XNPPn95X2';
 
       const fallbackProfile: CustomerUser = {
         id: fbUser.uid,
-        name: fbUser.displayName || (isAdminFallback ? 'Shiv Master Administrator' : 'User'),
-        username: fbUser.email ? fbUser.email.split('@')[0] : 'user',
+        name: fbUser.displayName || (isAdminFallback ? 'satu' : 'User'),
+        username: isAdminFallback ? 'satu' : (fbUser.email ? fbUser.email.split('@')[0] : 'user'),
         email: fbUser.email || '',
         phone: '',
         address: '',

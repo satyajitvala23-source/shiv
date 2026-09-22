@@ -119,18 +119,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const hash = window.location.hash.toLowerCase();
     return hash.includes('admin') ? 'admin' : 'user';
   });
-  const [currentView, setCurrentView] = useState<CurrentView>(() => {
-    const hash = window.location.hash.toLowerCase();
-    return hash.includes('admin') ? 'admin-dashboard' : 'user-dashboard';
-  });
+  const [currentView, setCurrentView] = useState<CurrentView>('login');
 
   // Firebase Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [authLoading, setAuthLoading] = useState<boolean>(false);
-  const [authRole, setAuthRole] = useState<'admin' | 'user' | null>(() => {
-    const hash = window.location.hash.toLowerCase();
-    return hash.includes('admin') ? 'admin' : 'user';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authRole, setAuthRole] = useState<'admin' | 'user' | null>(null);
 
   const [language, setLanguage] = useState<LanguageCode>('en');
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -223,17 +217,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setCurrentView('user-dashboard');
         }
       } else {
-        // If not logged in via Firebase Auth, default to active user session
-        setIsAuthenticated(true);
+        // Enforce sign in / sign up before website open
+        setIsAuthenticated(false);
+        setAuthRole(null);
         const hash = window.location.hash.toLowerCase();
-        if (hash.includes('admin')) {
-          setAuthRole('admin');
-          setSelectedRole('admin');
-          setCurrentView('admin-dashboard');
-        } else {
-          setAuthRole('user');
+        if (hash.includes('register')) {
+          setCurrentView('register');
           setSelectedRole('user');
-          setCurrentView('user-dashboard');
+        } else if (hash.includes('admin-login')) {
+          setCurrentView('admin-login');
+          setSelectedRole('admin');
+        } else {
+          setCurrentView('login');
+          setSelectedRole('user');
         }
       }
       setAuthLoading(false);
@@ -351,24 +347,64 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();
 
-      if (hash.includes('admin')) {
-        setCurrentView('admin-dashboard');
-        setSelectedRole('admin');
-        setAuthRole('admin');
+      if (!isAuthenticated) {
+        if (hash.includes('register')) {
+          setCurrentView('register');
+          setSelectedRole('user');
+        } else if (hash.includes('admin-login')) {
+          setCurrentView('admin-login');
+          setSelectedRole('admin');
+        } else {
+          setCurrentView('login');
+          setSelectedRole('user');
+          if (window.location.hash !== '#/login') {
+            window.location.hash = '#/login';
+          }
+        }
+        return;
+      }
+
+      // Authenticated users
+      if (authRole === 'admin') {
+        if (hash.includes('user-dashboard')) {
+          setCurrentView('user-dashboard');
+          setSelectedRole('admin');
+        } else {
+          setCurrentView('admin-dashboard');
+          setSelectedRole('admin');
+          if (window.location.hash !== '#/admin-dashboard') {
+            window.location.hash = '#/admin-dashboard';
+          }
+        }
       } else {
+        // Normal user is strictly restricted to user dashboard
         setCurrentView('user-dashboard');
         setSelectedRole('user');
-        setAuthRole('user');
+        if (window.location.hash !== '#/user-dashboard') {
+          window.location.hash = '#/user-dashboard';
+        }
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [isAuthenticated, authRole]);
 
   // Keep hash aligned with currentView
   useEffect(() => {
-    if (currentView === 'admin-dashboard') {
+    if (currentView === 'login') {
+      if (window.location.hash !== '#/login') {
+        window.location.hash = '#/login';
+      }
+    } else if (currentView === 'register') {
+      if (window.location.hash !== '#/register') {
+        window.location.hash = '#/register';
+      }
+    } else if (currentView === 'admin-login') {
+      if (window.location.hash !== '#/admin-login') {
+        window.location.hash = '#/admin-login';
+      }
+    } else if (currentView === 'admin-dashboard') {
       if (window.location.hash !== '#/admin-dashboard') {
         window.location.hash = '#/admin-dashboard';
       }
@@ -467,8 +503,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Quick role switcher / viewer
   const loginAs = (role: LoginRole) => {
+    if (role === 'admin' && authRole !== 'admin') {
+      return;
+    }
     setSelectedRole(role);
-    setAuthRole(role);
     if (role === 'admin') {
       setCurrentView('admin-dashboard');
       window.location.hash = '#/admin-dashboard';
@@ -478,18 +516,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Sign Out / Switch to Citizen Portal
+  // Sign Out / Switch to Login Screen
   const logout = async () => {
     try {
       await logoutUser();
     } catch (err) {
       console.error('Logout error:', err);
     }
-    setAuthRole('user');
-    setSelectedRole('user');
+    setIsAuthenticated(false);
+    setAuthRole(null);
     setCurrentUser(CURRENT_USER);
-    setCurrentView('user-dashboard');
-    window.location.hash = '#/user-dashboard';
+    setCurrentView('login');
+    window.location.hash = '#/login';
   };
 
   // Service Management
