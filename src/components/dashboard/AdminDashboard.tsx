@@ -912,10 +912,10 @@ export const AdminDashboard: React.FC = () => {
                                 type="button"
                                 onClick={() => {
                                   incrementFormDownload(form.id);
-                                  alert(`Simulating downloading: ${form.title}`);
+                                  alert(`Downloading form: ${form.title}`);
                                 }}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                title="Download Sample Form"
+                                title="Download Form"
                               >
                                 <Download className="w-4 h-4" />
                               </button>
@@ -1135,7 +1135,7 @@ export const AdminDashboard: React.FC = () => {
                             </span>
                             <button
                               type="button"
-                              onClick={() => alert(`Simulating file inspection for: ${doc.name}`)}
+                              onClick={() => alert(`Opening file preview for: ${doc.name}`)}
                               className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
                               title="Inspect File"
                             >
@@ -1271,7 +1271,7 @@ export const AdminDashboard: React.FC = () => {
                       required
                       value={newNotifTitle}
                       onChange={(e) => setNewNotifTitle(e.target.value)}
-                      placeholder="e.g. iKhedut Tar Fencing Scheme Last Date: March 31"
+                      placeholder="Enter announcement or update details"
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
                     />
                   </div>

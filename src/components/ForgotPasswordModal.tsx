@@ -312,10 +312,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <HelpCircle className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
                 <span>
                   {language === 'gu'
-                    ? 'તમે તમારો રજિસ્ટર્ડ ઈમેલ અથવા યુઝરનેમ (દા.ત. rahul અથવા satu) લખી શકો છો.'
+                    ? 'તમે તમારો રજિસ્ટર્ડ ઈમેલ અથવા યુઝરનેમ દાખલ કરી શકો છો.'
                     : language === 'hi'
-                    ? 'आप अपना पंजीकृत ईमेल या यूज़रनेम (उदा. rahul या satu) लिख सकते हैं।'
-                    : 'You can enter your registered email address or username (e.g. rahul or satu).'}
+                    ? 'आप अपना पंजीकृत ईमेल या यूज़रनेम दर्ज कर सकते हैं।'
+                    : 'You can enter your registered email address or username.'}
                 </span>
               </div>
             </div>

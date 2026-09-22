@@ -168,7 +168,7 @@ export const INITIAL_FORMS: FormTemplate[] = [
     id: 'FRM-02',
     title: 'Gujarat Income Certificate Affidavit Form (આવક સોગંદનામું નમૂનો)',
     category: 'revenue',
-    description: 'Notarized self-declaration sample affidavit for revenue income certificate as per Mamlatdar format.',
+    description: 'Notarized self-declaration affidavit for revenue income certificate as per Mamlatdar format.',
     fileSize: '680 KB',
     fileType: 'PDF Document',
     downloadCount: 2310,

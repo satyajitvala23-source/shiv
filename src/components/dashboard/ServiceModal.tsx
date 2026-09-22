@@ -116,7 +116,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Caste Certificate or Solar Pump Subsidy"
+              placeholder="Enter service name"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
@@ -144,7 +144,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
                 type="text"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                placeholder="e.g. Revenue Department"
+                placeholder="Enter department name"
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
               />
             </div>
@@ -172,7 +172,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
                 type="text"
                 value={processingTime}
                 onChange={(e) => setProcessingTime(e.target.value)}
-                placeholder="e.g. 5-7 Working Days"
+                placeholder="Enter processing duration"
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
               />
             </div>
@@ -200,7 +200,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
                 type="text"
                 value={newDocInput}
                 onChange={(e) => setNewDocInput(e.target.value)}
-                placeholder="Add document (e.g. Land 7/12 Extract)"
+                placeholder="Add required document name"
                 className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
               />
               <button

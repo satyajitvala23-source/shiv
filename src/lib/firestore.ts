@@ -86,6 +86,20 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
+function logFirestoreListenerIssue(context: string, error: any) {
+  const msg = error?.message || String(error);
+  const isOffline =
+    msg.includes('offline') ||
+    error?.code === 'unavailable' ||
+    msg.includes('client is offline');
+
+  if (isOffline) {
+    console.info(`[Firestore] ${context}: offline mode / local cache active.`);
+  } else {
+    console.warn(`[Firestore] ${context} notice:`, msg);
+  }
+}
+
 /**
  * ============================================================================
  * 1. FORM SUBMISSIONS
@@ -162,7 +176,7 @@ export function subscribeToAllSubmissions(
       onData(submissions);
     },
     (error) => {
-      console.warn('[Firestore] Submissions listener warning:', error.message);
+      logFirestoreListenerIssue('Submissions listener', error);
       if (onError) onError(error);
     }
   );
@@ -213,7 +227,7 @@ export function subscribeToUserSubmissions(
       onData(submissions);
     },
     (error) => {
-      console.warn('[Firestore] User submissions listener warning:', error.message);
+      logFirestoreListenerIssue('User submissions listener', error);
       if (onError) onError(error);
     }
   );
@@ -301,7 +315,7 @@ export function subscribeToAllUsers(
       onData(usersList);
     },
     (error) => {
-      console.warn('[Firestore] Users listener warning:', error.message);
+      logFirestoreListenerIssue('Users listener', error);
       if (onError) onError(error);
     }
   );
@@ -385,7 +399,7 @@ export function subscribeToWebsiteSettings(
       }
     },
     (err) => {
-      console.warn('[Firestore] Settings listener warning:', err.message);
+      logFirestoreListenerIssue('Settings listener', err);
     }
   );
 }
@@ -421,6 +435,16 @@ export async function saveWebsiteSettingsDoc(content: Partial<WebsiteContent>): 
  */
 export async function isUidAuthorizedAdmin(uid: string): Promise<boolean> {
   if (!uid) return false;
+
+  // Immediate check for verified admin UID or current user email
+  if (
+    uid === 'e3YVoiB8zSMJgUoYrM6XNPPn95X2' ||
+    auth.currentUser?.email === 'satyajitvala23@gmail.com' ||
+    auth.currentUser?.email === 'admin@shivcomputer.com' ||
+    auth.currentUser?.email === 'satu@shivcomputer.com'
+  ) {
+    return true;
+  }
 
   // 1. Check "admins" collection
   try {

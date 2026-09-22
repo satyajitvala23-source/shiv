@@ -93,7 +93,7 @@ export const FormModal: React.FC<FormModalProps> = ({
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Income Certificate Affidavit Form"
+              placeholder="Enter form title"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
@@ -136,7 +136,7 @@ export const FormModal: React.FC<FormModalProps> = ({
                 type="text"
                 value={fileSize}
                 onChange={(e) => setFileSize(e.target.value)}
-                placeholder="e.g. 520 KB"
+                placeholder="File size (KB / MB)"
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
               />
             </div>

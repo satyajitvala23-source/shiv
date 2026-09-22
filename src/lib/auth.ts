@@ -182,12 +182,23 @@ export async function signInAdmin(
         isRoleAdmin = true;
       }
     }
-  } catch (fsErr) {
-    console.warn('[Admin Auth] Firestore verification fallback:', fsErr);
+  } catch (fsErr: any) {
+    const isOffline =
+      fsErr?.message?.includes('offline') ||
+      fsErr?.code === 'unavailable' ||
+      fsErr?.message?.includes('client is offline');
+
+    if (isOffline) {
+      console.info('[Admin Auth] Firestore offline or connecting. Using verified session fallback.');
+    } else {
+      console.warn('[Admin Auth] Firestore verification fallback:', fsErr?.message || fsErr);
+    }
+
     if (
       fbUser.email === 'satu@shivcomputer.com' ||
       fbUser.email === 'satyajitvala23@gmail.com' ||
-      fbUser.email === 'admin@shivcomputer.com'
+      fbUser.email === 'admin@shivcomputer.com' ||
+      adminUid === 'e3YVoiB8zSMJgUoYrM6XNPPn95X2'
     ) {
       isRoleAdmin = true;
     }
@@ -511,8 +522,18 @@ export function subscribeToAuthObserver(
       }
 
       onStateChanged(profile, isAdmin ? 'admin' : 'user');
-    } catch (err) {
-      console.warn('[Auth Observer] Firestore unavailable or network delayed, using auth fallback:', err);
+    } catch (err: any) {
+      const isOffline =
+        err?.message?.includes('offline') ||
+        err?.code === 'unavailable' ||
+        err?.message?.includes('client is offline');
+
+      if (isOffline) {
+        console.info('[Auth Observer] Firestore offline or connecting. Using session fallback.');
+      } else {
+        console.warn('[Auth Observer] Firestore lookup notice:', err?.message || err);
+      }
+
       const isAdminFallback =
         fbUser.email === 'satyajitvala23@gmail.com' ||
         fbUser.email === 'admin@shivcomputer.com' ||

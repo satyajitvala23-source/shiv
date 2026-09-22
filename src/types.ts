@@ -158,7 +158,7 @@ export interface TranslationStrings {
   loginButton: string;
   loggingIn: string;
   backToHome: string;
-  demoCredentialsNote: string;
+  authCredentialsNote: string;
   signUpTab: string;
   signInTab: string;
   fullNameLabel: string;

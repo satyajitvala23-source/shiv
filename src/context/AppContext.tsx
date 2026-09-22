@@ -641,8 +641,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     // Sync status and notes directly to Firestore form_submissions
-    updateSubmissionStatusDoc(id, status.toLowerCase(), adminNote)
-      .catch((err) => console.warn('[Firestore] updateSubmissionStatusDoc warning:', err));
+    updateSubmissionStatusDoc(id, status.toLowerCase(), adminNote).catch((err) => {
+      const msg = err?.message || String(err);
+      if (msg.includes('offline') || err?.code === 'unavailable') {
+        console.info('[Firestore] Status updated locally (offline mode).');
+      } else {
+        console.warn('[Firestore] updateSubmissionStatusDoc notice:', msg);
+      }
+    });
   };
 
   const applyForService = (service: ServiceItem, applicantNotes?: string): Application => {
@@ -694,7 +700,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         uploadedDocuments: newApp.uploadedDocuments,
       },
       status: 'pending',
-    }).catch((err) => console.warn('[Firestore] createFormSubmission warning:', err));
+    }).catch((err) => {
+      const msg = err?.message || String(err);
+      if (msg.includes('offline') || err?.code === 'unavailable') {
+        console.info('[Firestore] Form submission stored locally (offline mode).');
+      } else {
+        console.warn('[Firestore] createFormSubmission notice:', msg);
+      }
+    });
 
     const newPayment: PaymentRecord = {
       id: `TXN-${Date.now().toString().slice(-6)}`,
@@ -812,9 +825,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Website Content
   const updateWebsiteContent = (updates: Partial<WebsiteContent>) => {
     setWebsiteContent((prev) => ({ ...prev, ...updates }));
-    saveWebsiteSettingsDoc(updates).catch((err) =>
-      console.warn('[Firestore] saveWebsiteSettingsDoc warning:', err)
-    );
+    saveWebsiteSettingsDoc(updates).catch((err) => {
+      const msg = err?.message || String(err);
+      if (msg.includes('offline') || err?.code === 'unavailable') {
+        console.info('[Firestore] Website settings saved locally (offline mode).');
+      } else {
+        console.warn('[Firestore] saveWebsiteSettingsDoc notice:', msg);
+      }
+    });
   };
 
   return (

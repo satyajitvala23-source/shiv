@@ -114,7 +114,7 @@ export const ApplyServiceModal: React.FC<ApplyServiceModalProps> = ({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Survey number, urgent timeline, previous certificate details"
+              placeholder="Enter survey number, required timeline, or other specific instructions"
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20"
             />
           </div>

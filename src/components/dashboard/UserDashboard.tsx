@@ -404,7 +404,7 @@ export const UserDashboard: React.FC = () => {
                   </h3>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Enter your Application Tracking ID (e.g. <strong>APP-2026-001</strong>) to view current stage and department remarks.
+                  Enter your Application Tracking ID to view current stage and department remarks.
                 </p>
 
                 <form onSubmit={handleTrackSubmit} className="flex gap-2 max-w-lg">
@@ -1094,7 +1094,7 @@ export const UserDashboard: React.FC = () => {
                       required
                       value={inquirySubject}
                       onChange={(e) => setInquirySubject(e.target.value)}
-                      placeholder="e.g. Help needed with iKhedut Tar Fencing survey number"
+                      placeholder="Enter subject or scheme name"
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
                     />
                   </div>

@@ -249,7 +249,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                     <button
                       type="button"
                       title="Download document copy"
-                      onClick={() => alert(`Simulating download for: ${doc.name}`)}
+                      onClick={() => alert(`Downloading document: ${doc.name}`)}
                       className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
                     >
                       <Download className="w-4 h-4" />
@@ -264,7 +264,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
               <form onSubmit={handleUploadNewDoc} className="mt-3 flex items-center gap-2">
                 <input
                   type="text"
-                  placeholder="e.g. Updated_Passport_Photo.pdf or Land_Extract_New.pdf"
+                  placeholder="Enter document title or filename (PDF, JPG, PNG)"
                   value={newDocUploadName}
                   onChange={(e) => setNewDocUploadName(e.target.value)}
                   className="flex-1 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20"

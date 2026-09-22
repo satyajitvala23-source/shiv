@@ -1,12 +1,12 @@
 {
   "projectId": "shivv-1fd2b",
-  "appId": "1:1082170139511:web:1ec29e4a6658c735b0f772",
+  "appId": "1:1082170139511:web:5818e2d7c63c364db0f772",
   "apiKey": "AIzaSyBOcMj0QVnvY2rTonvs48Jmi38Asv6pyjQ",
   "authDomain": "shivv-1fd2b.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
+  "firestoreDatabaseId": "ai-studio-shivcomputerlogi-1be3bbb8-d2dc-4f7e-a12c-dfadd6ae6d5d",
   "storageBucket": "shivv-1fd2b.firebasestorage.app",
   "messagingSenderId": "1082170139511",
   "measurementId": "",
-  "oAuthClientId": "",
+  "oAuthClientId": "1082170139511-7s7snthnbmcvpg40tfdnc36tb2b60t44.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }
