@@ -75,18 +75,12 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (language === 'gu') {
         return 'આ ઈમેલ અથવા યુઝરનેમ સાથે કોઈ ખાતું મળ્યું નથી. કૃપા કરીને સ્પેલિંગ તપાસો.';
       }
-      if (language === 'hi') {
-        return 'इस ईमेल या यूज़रनेम के साथ कोई खाता नहीं मिला। कृपया वर्तनी जांचें।';
-      }
       return 'No account found with this email or username. Please check your spelling.';
     }
 
     if (code === 'auth/invalid-email') {
       if (language === 'gu') {
         return 'કૃપા કરીને માન્ય ઈમેલ સરનામું દાખલ કરો.';
-      }
-      if (language === 'hi') {
-        return 'कृपया एक वैध ईमेल पता दर्ज करें।';
       }
       return 'Please enter a valid email address.';
     }
@@ -95,9 +89,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (language === 'gu') {
         return 'કૃપા કરીને તમારો નોંધાયેલ ઈમેલ અથવા યુઝરનેમ દાખલ કરો.';
       }
-      if (language === 'hi') {
-        return 'कृपया अपना पंजीकृत ईमेल या यूज़रनेम दर्ज करें।';
-      }
       return 'Please enter your registered email address or username.';
     }
 
@@ -105,18 +96,12 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       if (language === 'gu') {
         return 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરોનો હોવો જોઈએ.';
       }
-      if (language === 'hi') {
-        return 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए।';
-      }
       return 'Password must be at least 6 characters long.';
     }
 
     if (code === 'auth/network-request-failed') {
       if (language === 'gu') {
         return 'નેટવર્ક કનેક્શન સમસ્યા. કૃપા કરીને તમારું ઇન્ટરનેટ કનેક્શન તપાસો.';
-      }
-      if (language === 'hi') {
-        return 'नेटवर्क कनेक्शन समस्या। कृपया अपना इंटरनेट कनेक्शन जांचें।';
       }
       return 'Network connection problem. Please verify your internet connection.';
     }
@@ -134,8 +119,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       setErrorMessage(
         language === 'gu'
           ? 'કૃપા કરીને તમારો નોંધાયેલ ઈમેલ અથવા યુઝરનેમ દાખલ કરો.'
-          : language === 'hi'
-          ? 'कृपया अपना पंजीकृत ईमेल या यूज़रनेम दर्ज करें।'
           : 'Please enter your registered email address or username.'
       );
       return;
@@ -145,8 +128,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       setErrorMessage(
         language === 'gu'
           ? 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરોનો હોવો જોઈએ.'
-          : language === 'hi'
-          ? 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए।'
           : 'New password must be at least 6 characters long.'
       );
       return;
@@ -156,8 +137,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       setErrorMessage(
         language === 'gu'
           ? 'બંને પાસવર્ડ મેળ ખાતા નથી.'
-          : language === 'hi'
-          ? 'दोनों पासवर्ड मेल नहीं खाते।'
           : 'Passwords do not match. Please verify.'
       );
       return;
@@ -177,7 +156,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
 
   const getSetPasswordBtnText = () => {
     if (language === 'gu') return 'સીધો પાસવર્ડ સેટ કરો';
-    if (language === 'hi') return 'सीधा पासवर्ड सेट करें';
     return 'Set Password Directly';
   };
 
@@ -313,8 +291,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 <span>
                   {language === 'gu'
                     ? 'તમે તમારો રજિસ્ટર્ડ ઈમેલ અથવા યુઝરનેમ દાખલ કરી શકો છો.'
-                    : language === 'hi'
-                    ? 'आप अपना पंजीकृत ईमेल या यूज़रनेम दर्ज कर सकते हैं।'
                     : 'You can enter your registered email address or username.'}
                 </span>
               </div>

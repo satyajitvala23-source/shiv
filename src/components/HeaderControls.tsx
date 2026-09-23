@@ -66,7 +66,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
             aria-label="Select Language"
             aria-expanded={isLangOpen}
           >
-            <Globe className="w-3.5 h-3.5 text-slate-500" />
+            <span className="text-base leading-none">{currentLang.flag}</span>
             <span className="font-medium">{currentLang.nativeLabel}</span>
             <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -74,7 +74,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
           {isLangOpen && (
             <div
               id="language-dropdown-menu"
-              className="absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-slate-200/90 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
+              className="absolute right-0 mt-1.5 w-44 bg-white rounded-xl shadow-lg border border-slate-200/90 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
             >
               <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 Language / ભાષા
@@ -96,7 +96,10 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
                         : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
-                    <span>{lang.nativeLabel}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-base">{lang.flag}</span>
+                      <span>{lang.nativeLabel}</span>
+                    </span>
                     {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
                   </button>
                 );

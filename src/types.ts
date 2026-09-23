@@ -7,7 +7,7 @@ export type CurrentView =
   | 'admin-dashboard'
   | 'user-dashboard';
 
-export type LanguageCode = 'en' | 'gu' | 'hi';
+export type LanguageCode = 'en' | 'gu';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -15,6 +15,7 @@ export interface LanguageOption {
   code: LanguageCode;
   label: string;
   nativeLabel: string;
+  flag: string;
 }
 
 export type ApplicationStatus =
@@ -261,6 +262,115 @@ export interface TranslationStrings {
     myProfile: string;
     helpSupport: string;
     logout: string;
+  };
+  common: {
+    save: string;
+    cancel: string;
+    edit: string;
+    delete: string;
+    submit: string;
+    view: string;
+    upload: string;
+    download: string;
+    search: string;
+    filter: string;
+    close: string;
+    refresh: string;
+    back: string;
+    next: string;
+    status: string;
+    actions: string;
+    details: string;
+    date: string;
+    category: string;
+    all: string;
+    loading: string;
+    noData: string;
+    success: string;
+    error: string;
+    confirm: string;
+    logout: string;
+    login: string;
+    copy: string;
+    copied: string;
+    yes: string;
+    no: string;
+    clear: string;
+    viewAll: string;
+    total: string;
+    active: string;
+    pending: string;
+    approved: string;
+    rejected: string;
+    processing: string;
+    completed: string;
+    documentRequired: string;
+    paid: string;
+    waived: string;
+    failed: string;
+    verified: string;
+    home: string;
+    dashboard: string;
+    profile: string;
+    documents: string;
+    notifications: string;
+    settings: string;
+    contact: string;
+    support: string;
+    users: string;
+    reports: string;
+    searchPlaceholder: string;
+    noRecordsFound: string;
+    confirmDelete: string;
+    deleteWarning: string;
+    searchApplications: string;
+    overview: string;
+    quickActions: string;
+    recentApplications: string;
+    statusTitle: string;
+  };
+  status: {
+    pending: string;
+    processing: string;
+    documentRequired: string;
+    approved: string;
+    rejected: string;
+    completed: string;
+  };
+  addressCard: {
+    owner: string;
+    whatsapp: string;
+    address: string;
+    phone: string;
+    centerOwnerTitle: string;
+    centerOwnerSub: string;
+    verifiedCenter: string;
+    officeAddressTitle: string;
+    copyAddress: string;
+    addressCopied: string;
+    whatsappButton: string;
+    callButton: string;
+    viewOnMap: string;
+    workingHours: string;
+    workingHoursVal: string;
+    quickContact: string;
+    facilityTitle: string;
+    facilitySub: string;
+  };
+  aiChatbot: {
+    launcherText: string;
+    title: string;
+    subtitle: string;
+    welcomeMsg: string;
+    inputPlaceholder: string;
+    sendButton: string;
+    closeButton: string;
+    quickQuestionsTitle: string;
+    q1: string;
+    q2: string;
+    q3: string;
+    q4: string;
+    disclaimer: string;
   };
 }
 

@@ -33,6 +33,7 @@ import { Application, ApplicationStatus, FormTemplate, ServiceItem } from '../..
 import { DashboardHeader } from './DashboardHeader';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplyServiceModal } from './ApplyServiceModal';
+import { OfficeAddressCard } from './OfficeAddressCard';
 import { sendPasswordReset, resendVerificationEmail, auth } from '../../lib/firebase';
 
 type UserTab =
@@ -52,6 +53,7 @@ type UserTab =
 export const UserDashboard: React.FC = () => {
   const {
     t,
+    language,
     logout,
     currentUser,
     applications,
@@ -64,6 +66,25 @@ export const UserDashboard: React.FC = () => {
     incrementFormDownload,
     websiteContent,
   } = useApp();
+
+  const getStatusLabel = (status: ApplicationStatus): string => {
+    switch (status) {
+      case 'Approved':
+        return t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved');
+      case 'Completed':
+        return t?.status?.completed || (language === 'gu' ? 'પૂર્ણ થયેલ' : 'Completed');
+      case 'Processing':
+        return t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing');
+      case 'Pending':
+        return t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending');
+      case 'Document Required':
+        return t?.status?.documentRequired || (language === 'gu' ? 'દસ્તાવેજ જરૂરી' : 'Document Required');
+      case 'Rejected':
+        return t?.status?.rejected || (language === 'gu' ? 'નામંજૂર' : 'Rejected');
+      default:
+        return status;
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<UserTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -227,7 +248,7 @@ export const UserDashboard: React.FC = () => {
           {/* Scrollable Navigation */}
           <div className="p-3 overflow-y-auto space-y-1">
             <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Citizen Portal
+              {language === 'gu' ? 'નાગરિક પોર્ટલ' : 'Citizen Portal'}
             </div>
 
             {navItems.map((item) => {
@@ -341,13 +362,15 @@ export const UserDashboard: React.FC = () => {
               <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="text-xs font-semibold uppercase tracking-wider text-blue-100">
-                    Welcome back to Shiv Computer Portal
+                    {language === 'gu' ? 'શિવ કમ્પ્યુટર પોર્ટલમાં આપનું સ્વાગત છે' : 'Welcome back to Shiv Computer Portal'}
                   </div>
                   <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-                    Namaste, {currentUser.name || 'Citizen'}
+                    {language === 'gu' ? `નમસ્તે, ${currentUser.name || 'નાગરિક'}` : `Namaste, ${currentUser.name || 'Citizen'}`}
                   </h1>
                   <p className="text-xs text-blue-100 max-w-lg">
-                    Manage your government certificates, agricultural subsidies, land records, and download official affidavit formats.
+                    {language === 'gu'
+                      ? 'તમારા સરકારી પ્રમાણપત્રો, કૃષિ સબસિડીઓ, જમીન રેકોર્ડનું સંચાલન કરો અને અધિકૃત ફોર્મ્સ ડાઉનલોડ કરો.'
+                      : 'Manage your government certificates, agricultural subsidies, land records, and download official affidavit formats.'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -357,7 +380,7 @@ export const UserDashboard: React.FC = () => {
                     className="px-4 py-2.5 rounded-xl bg-white text-blue-700 font-bold text-xs hover:bg-blue-50 shadow-xs flex items-center gap-1.5 transition-all"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Apply for Service</span>
+                    <span>{t.userSidebar.applyForService}</span>
                   </button>
                 </div>
               </div>
@@ -365,33 +388,33 @@ export const UserDashboard: React.FC = () => {
               {/* Status Summary KPI Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">My Applications</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'મારી અરજીઓ' : 'My Applications'}</div>
                   <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalUserApps}</div>
-                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">Submitted</div>
+                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">{language === 'gu' ? 'સબમિટ કરેલ' : 'Submitted'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">In Progress</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'In Progress'}</div>
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
                     {pendingUserApps + processingUserApps}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Under department check</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{language === 'gu' ? 'વિભાગ તપાસ હેઠળ' : 'Under department check'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Approved</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}</div>
                   <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
                     {approvedUserApps}
                   </div>
-                  <div className="text-[11px] text-emerald-500 mt-0.5">Ready for collection</div>
+                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'પ્રમાણપત્ર તૈયાર' : 'Ready for collection'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Payments Made</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'ચુકવણીઓ' : 'Payments Made'}</div>
                   <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
                     ₹{userPayments.reduce((acc, p) => acc + p.amount, 0)}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">{userPayments.length} transactions</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{userPayments.length} {language === 'gu' ? 'વ્યવહારો' : 'transactions'}</div>
                 </div>
               </div>
 
@@ -436,7 +459,7 @@ export const UserDashboard: React.FC = () => {
                         </span>
                       </div>
                       <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                        Status: <strong className="text-blue-700 dark:text-blue-300">{trackedApp.status}</strong> • Submitted: {trackedApp.applicationDate}
+                        {language === 'gu' ? 'સ્થિતિ: ' : 'Status: '}<strong className="text-blue-700 dark:text-blue-300">{getStatusLabel(trackedApp.status)}</strong> • {language === 'gu' ? 'સબમિટ તારીખ: ' : 'Submitted: '}{trackedApp.applicationDate}
                       </div>
                       {trackedApp.adminNotes && (
                         <div className="text-xs text-amber-800 dark:text-amber-200/90 mt-1 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-lg border border-amber-200/50">
@@ -503,7 +526,7 @@ export const UserDashboard: React.FC = () => {
                             <td className="py-3 px-4 text-slate-500">{app.applicationDate}</td>
                             <td className="py-3 px-4">
                               <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(app.status)}`}>
-                                {app.status}
+                                {getStatusLabel(app.status)}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-right">
@@ -524,6 +547,20 @@ export const UserDashboard: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+
+              {/* Official Center & Office Address Card */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Official Facilitation Center & Support Office</span>
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Char Chok, Keshod
+                  </span>
+                </div>
+                <OfficeAddressCard />
               </div>
             </div>
           )}
@@ -620,7 +657,7 @@ export const UserDashboard: React.FC = () => {
 
                       <div className="flex items-center gap-3">
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${getStatusBadge(app.status)}`}>
-                          {app.status}
+                          {getStatusLabel(app.status)}
                         </span>
                         <button
                           type="button"
@@ -866,7 +903,7 @@ export const UserDashboard: React.FC = () => {
                           <h3 className="font-bold text-base text-slate-900 dark:text-white">{app.serviceName}</h3>
                         </div>
                         <span className={`text-xs font-semibold px-3 py-1 rounded-full border self-start ${getStatusBadge(app.status)}`}>
-                          {app.status}
+                          {getStatusLabel(app.status)}
                         </span>
                       </div>
 
@@ -906,8 +943,8 @@ export const UserDashboard: React.FC = () => {
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
                         }`}>
                           <Check className="w-4 h-4 mx-auto mb-1" />
-                          <div>4. Outcome</div>
-                          <div className="text-[10px] text-slate-400">{app.status}</div>
+                          <div>{language === 'gu' ? '૪. પરિણામ' : '4. Outcome'}</div>
+                          <div className="text-[10px] text-slate-400">{getStatusLabel(app.status)}</div>
                         </div>
                       </div>
 
@@ -970,7 +1007,7 @@ export const UserDashboard: React.FC = () => {
                             <td className="py-3 px-4 font-bold text-emerald-600">₹{p.amount}</td>
                             <td className="py-3 px-4">
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                {p.status}
+                                {p.status === 'Successful' ? (language === 'gu' ? 'સફળ' : 'Successful') : (language === 'gu' ? 'બાકી' : 'Pending')}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-right">
@@ -1049,38 +1086,14 @@ export const UserDashboard: React.FC = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Contact card */}
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                    Shiv Computer Center Contacts
-                  </h3>
+              {/* Enhanced Office Address & Owner Contact Card */}
+              <OfficeAddressCard />
 
-                  <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
-                    <div className="flex items-center gap-2.5">
-                      <Phone className="w-4 h-4 text-blue-600 shrink-0" />
-                      <span>{websiteContent.contactPhone}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Mail className="w-4 h-4 text-blue-600 shrink-0" />
-                      <span>support@shivcomputer.com</span>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                      <span>{websiteContent.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <Clock className="w-4 h-4 text-blue-600 shrink-0" />
-                      <span>Hours: {websiteContent.workingHours}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submit query */}
-                <form
-                  onSubmit={handleSendInquiry}
-                  className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 text-xs"
-                >
+              {/* Submit query */}
+              <form
+                onSubmit={handleSendInquiry}
+                className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs"
+              >
                   <div className="font-bold text-sm text-slate-900 dark:text-white">
                     Submit Query / Request Callback
                   </div>
@@ -1125,8 +1138,7 @@ export const UserDashboard: React.FC = () => {
                   </div>
                 </form>
               </div>
-            </div>
-          )}
+            )}
 
           {/* TAB 12: MY PROFILE */}
           {activeTab === 'myProfile' && (

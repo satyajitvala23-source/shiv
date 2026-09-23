@@ -5,6 +5,7 @@ import { UserDashboard } from './components/dashboard/UserDashboard';
 import { LoginForm } from './components/LoginForm';
 import { HeaderControls } from './components/HeaderControls';
 import { ForgotPasswordModal } from './components/ForgotPasswordModal';
+import { AIChatbot } from './components/AIChatbot';
 
 function AppContent() {
   const {
@@ -98,19 +99,22 @@ function AppContent() {
           language={language}
           t={t}
         />
+        <AIChatbot />
       </div>
     );
   }
 
   // Strict RBAC protection: Only users with role === 'admin' can access Admin Dashboard
-  if (currentView === 'admin-dashboard') {
-    if (authRole !== 'admin') {
-      return <UserDashboard />;
-    }
-    return <AdminDashboard />;
-  }
-
-  return <UserDashboard />;
+  return (
+    <>
+      {currentView === 'admin-dashboard' && authRole === 'admin' ? (
+        <AdminDashboard />
+      ) : (
+        <UserDashboard />
+      )}
+      <AIChatbot />
+    </>
+  );
 }
 
 export default function App() {

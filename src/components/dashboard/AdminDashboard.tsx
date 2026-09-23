@@ -31,6 +31,7 @@ import {
   Send,
   Power,
   TrendingUp,
+  MapPin,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -44,6 +45,7 @@ import { DashboardHeader } from './DashboardHeader';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ServiceModal } from './ServiceModal';
 import { FormModal } from './FormModal';
+import { OfficeAddressCard } from './OfficeAddressCard';
 
 type AdminTab =
   | 'dashboard'
@@ -63,6 +65,7 @@ type AdminTab =
 export const AdminDashboard: React.FC = () => {
   const {
     t,
+    language,
     logout,
     applications,
     services,
@@ -88,6 +91,25 @@ export const AdminDashboard: React.FC = () => {
     deleteNotification,
     updateApplicationStatus,
   } = useApp();
+
+  const getStatusLabel = (status: ApplicationStatus): string => {
+    switch (status) {
+      case 'Approved':
+        return t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved');
+      case 'Completed':
+        return t?.status?.completed || (language === 'gu' ? 'પૂર્ણ થયેલ' : 'Completed');
+      case 'Processing':
+        return t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing');
+      case 'Pending':
+        return t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending');
+      case 'Document Required':
+        return t?.status?.documentRequired || (language === 'gu' ? 'દસ્તાવેજ જરૂરી' : 'Document Required');
+      case 'Rejected':
+        return t?.status?.rejected || (language === 'gu' ? 'નામંજૂર' : 'Rejected');
+      default:
+        return status;
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -243,7 +265,7 @@ export const AdminDashboard: React.FC = () => {
           {/* Scrollable Navigation */}
           <div className="p-3 overflow-y-auto space-y-1">
             <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Admin Master Controls
+              {language === 'gu' ? 'એડમિન કંટ્રોલ પેનલ' : 'Admin Master Controls'}
             </div>
 
             {navItems.map((item) => {
@@ -333,39 +355,39 @@ export const AdminDashboard: React.FC = () => {
               {/* KPI Metrics Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Total Applications</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'કુલ અરજીઓ' : 'Total Applications'}</div>
                   <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalApps}</div>
-                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">Active Queue</div>
+                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">{language === 'gu' ? 'કુલ સક્રિય' : 'Active Queue'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Pending</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')}</div>
                   <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{pendingApps}</div>
-                  <div className="text-[11px] text-amber-500 mt-0.5">Requires Verification</div>
+                  <div className="text-[11px] text-amber-500 mt-0.5">{language === 'gu' ? 'તપાસ બાકી' : 'Requires Verification'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Processing</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing')}</div>
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{processingApps}</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">With Govt Office</div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">{language === 'gu' ? 'સરકારી વિભાગમાં' : 'With Govt Office'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Approved</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}</div>
                   <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{approvedApps}</div>
-                  <div className="text-[11px] text-emerald-500 mt-0.5">Certificate Issued</div>
+                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'મંજૂર થયેલ' : 'Certificate Issued'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Registered Users</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'નોંધાયેલા નાગરિકો' : 'Registered Users'}</div>
                   <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{users.length}</div>
-                  <div className="text-[11px] text-indigo-500 mt-0.5">Citizens in Junagadh</div>
+                  <div className="text-[11px] text-indigo-500 mt-0.5">{language === 'gu' ? 'કેશોદ / જૂનાગઢ' : 'Citizens in Junagadh'}</div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">Total Revenue</div>
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'કુલ આવક' : 'Total Revenue'}</div>
                   <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">₹{totalRevenue}</div>
-                  <div className="text-[11px] text-emerald-500 mt-0.5">Paid via UPI / Cash</div>
+                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'UPI / રોકડ' : 'Paid via UPI / Cash'}</div>
                 </div>
               </div>
 
@@ -487,7 +509,7 @@ export const AdminDashboard: React.FC = () => {
                             <td className="py-3 px-4 text-slate-500">{app.applicationDate}</td>
                             <td className="py-3 px-4">
                               <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(app.status)}`}>
-                                {app.status}
+                                {getStatusLabel(app.status)}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-right">
@@ -508,6 +530,20 @@ export const AdminDashboard: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+
+              {/* Official Center Profile & Address Card */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Official Facilitation Center & Owner Profile</span>
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Char Chok, Keshod
+                  </span>
+                </div>
+                <OfficeAddressCard highlightAdmin={true} />
               </div>
             </div>
           )}
@@ -546,13 +582,13 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) => setAppStatusFilter(e.target.value)}
                     className="px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   >
-                    <option value="all">All Statuses ({applications.length})</option>
-                    <option value="Pending">Pending ({applications.filter((a) => a.status === 'Pending').length})</option>
-                    <option value="Processing">Processing ({applications.filter((a) => a.status === 'Processing').length})</option>
-                    <option value="Document Required">Document Required ({applications.filter((a) => a.status === 'Document Required').length})</option>
-                    <option value="Approved">Approved ({applications.filter((a) => a.status === 'Approved').length})</option>
-                    <option value="Rejected">Rejected ({applications.filter((a) => a.status === 'Rejected').length})</option>
-                    <option value="Completed">Completed ({applications.filter((a) => a.status === 'Completed').length})</option>
+                    <option value="all">{language === 'gu' ? 'બધી સ્થિતિ' : 'All Statuses'} ({applications.length})</option>
+                    <option value="Pending">{t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')} ({applications.filter((a) => a.status === 'Pending').length})</option>
+                    <option value="Processing">{t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing')} ({applications.filter((a) => a.status === 'Processing').length})</option>
+                    <option value="Document Required">{t?.status?.documentRequired || (language === 'gu' ? 'દસ્તાવેજ જરૂરી' : 'Document Required')} ({applications.filter((a) => a.status === 'Document Required').length})</option>
+                    <option value="Approved">{t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')} ({applications.filter((a) => a.status === 'Approved').length})</option>
+                    <option value="Rejected">{t?.status?.rejected || (language === 'gu' ? 'નામંજૂર' : 'Rejected')} ({applications.filter((a) => a.status === 'Rejected').length})</option>
+                    <option value="Completed">{t?.status?.completed || (language === 'gu' ? 'પૂર્ણ થયેલ' : 'Completed')} ({applications.filter((a) => a.status === 'Completed').length})</option>
                   </select>
                 </div>
               </div>
@@ -608,7 +644,7 @@ export const AdminDashboard: React.FC = () => {
                             </td>
                             <td className="py-3.5 px-4">
                               <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getStatusBadge(app.status)}`}>
-                                {app.status}
+                                {getStatusLabel(app.status)}
                               </span>
                             </td>
                             <td className="py-3.5 px-4 text-right">
@@ -1102,7 +1138,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
                       <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border self-start ${getStatusBadge(app.status)}`}>
-                        {app.status}
+                        {getStatusLabel(app.status)}
                       </span>
                     </div>
 
@@ -1496,6 +1532,20 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Official Center & Office Address Card (Live Public View) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Official Center & Owner Contact Card (Live Display)</span>
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Keshod, Gujarat
+                  </span>
+                </div>
+                <OfficeAddressCard highlightAdmin={true} />
+              </div>
+
               <form onSubmit={handleSaveWebContent} className="space-y-4 text-xs sm:text-sm">
                 <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
                   <div className="font-bold text-sm text-slate-900 dark:text-white">
@@ -1553,7 +1603,7 @@ export const AdminDashboard: React.FC = () => {
 
                   <div>
                     <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Physical Center Address (Junagadh)
+                      Physical Center Address (Char Chok, Keshod)
                     </label>
                     <input
                       type="text"

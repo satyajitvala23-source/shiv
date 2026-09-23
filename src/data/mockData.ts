@@ -239,8 +239,8 @@ export const INITIAL_WEBSITE_CONTENT: WebsiteContent = {
   workingHours: 'Monday to Saturday: 09:00 AM – 08:30 PM | Sunday: 10:00 AM – 02:00 PM',
   contactEmail: 'shivcomputer.service@gmail.com',
   contactPhone: '+91 92134 88440',
-  ownerName: 'Raviraj Makvana',
+  ownerName: 'Raviraj Makwana',
   whatsappNumber: '+91 92134 88440',
-  address: 'Near Old Railway Crossing, Char Chok, Keshod - 362220',
+  address: 'Near Old Railway Crossing, Char Chok, Keshod – 362220, Gujarat, India.',
   aboutUs: 'Shiv Computer has been providing trustworthy IT hardware sales, maintenance, e-Governance services, Digital Gujarat certificates, and agriculture farmer welfare applications for over 14 years in the Saurashtra region.',
 };

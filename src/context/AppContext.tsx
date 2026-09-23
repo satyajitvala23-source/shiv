@@ -126,7 +126,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [authRole, setAuthRole] = useState<'admin' | 'user' | null>(null);
 
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguageState] = useState<LanguageCode>(() => {
+    try {
+      const saved = localStorage.getItem('language') || localStorage.getItem('sc_language');
+      if (saved === 'gu' || saved === 'en') {
+        return saved as LanguageCode;
+      }
+    } catch {
+      // ignore
+    }
+    return 'en';
+  });
+
+  const setLanguage = (lang: LanguageCode) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem('language', lang);
+      localStorage.setItem('sc_language', lang);
+    } catch {
+      // ignore
+    }
+  };
   const [theme, setTheme] = useState<ThemeMode>(() => {
     try {
       const savedTheme = localStorage.getItem('sc_theme');
@@ -184,9 +204,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return {
           ...INITIAL_WEBSITE_CONTENT,
           ...parsed,
-          ownerName: parsed.ownerName || INITIAL_WEBSITE_CONTENT.ownerName,
+          ownerName: parsed.ownerName && parsed.ownerName !== 'Raviraj Makvana' ? parsed.ownerName : INITIAL_WEBSITE_CONTENT.ownerName,
           whatsappNumber: parsed.whatsappNumber || INITIAL_WEBSITE_CONTENT.whatsappNumber,
-          address: parsed.address && !parsed.address.includes('Junagadh') ? parsed.address : INITIAL_WEBSITE_CONTENT.address,
+          address: parsed.address && parsed.address.includes('Gujarat') ? parsed.address : INITIAL_WEBSITE_CONTENT.address,
         };
       } catch {
         return INITIAL_WEBSITE_CONTENT;
@@ -846,7 +866,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLanguage,
         theme,
         toggleTheme,
-        t: TRANSLATIONS[language],
+        t: TRANSLATIONS[language === 'gu' ? 'gu' : 'en'] || TRANSLATIONS.en,
         isAuthenticated,
         authLoading,
         authRole,
