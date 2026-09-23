@@ -155,9 +155,9 @@ export async function resolveEmailFromIdentifier(identifier: string): Promise<st
     // ignore
   }
 
-// Fallback for default admin identity
+  // Fallback for default admin identity: project owner email
   if (normalized === 'admin' || normalized === 'satu') {
-    return 'satu@shivcomputer.com';
+    return 'satyajitvala23@gmail.com';
   }
 
   return trimmed;
@@ -179,10 +179,28 @@ export async function signInAdmin(
   identifier: string,
   password: string
 ): Promise<{ user: CustomerUser; role: 'admin' }> {
-  const email = await resolveEmailFromIdentifier(identifier);
+  let email = await resolveEmailFromIdentifier(identifier);
 
   // Authenticate through Firebase Authentication
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  let userCredential;
+  try {
+    userCredential = await signInWithEmailAndPassword(auth, email, password);
+  } catch (firstErr: any) {
+    // If identifier was admin or satu, also attempt fallback to satu@shivcomputer.com
+    const normalized = cleanUsername(identifier);
+    if (normalized === 'admin' || normalized === 'satu') {
+      const altEmail = email === 'satyajitvala23@gmail.com' ? 'satu@shivcomputer.com' : 'satyajitvala23@gmail.com';
+      try {
+        userCredential = await signInWithEmailAndPassword(auth, altEmail, password);
+        email = altEmail;
+      } catch {
+        throw firstErr;
+      }
+    } else {
+      throw firstErr;
+    }
+  }
+
   const fbUser = userCredential.user;
 
   // Step 1: Get Firebase Auth UID
