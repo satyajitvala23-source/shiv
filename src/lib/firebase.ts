@@ -149,32 +149,15 @@ export async function isUsernameAvailable(username: string): Promise<boolean> {
 }
 
 /**
- * 10. Direct Password Reset (In-app recovery)
+ * 10. Secure Firebase Password Reset methods
+ * Complies with strict security rules:
+ * - Uses Firebase Authentication sendPasswordResetEmail()
+ * - Uses Firebase Authentication verifyPasswordResetCode() & confirmPasswordReset()
+ * - Never stores plain-text passwords in Firestore or client storage.
  */
-export async function resetPasswordDirectly(
-  identifierOrEmail: string,
-  newPassword: string
-): Promise<{ success: boolean; email: string; username: string }> {
-  const trimmed = identifierOrEmail.trim();
-  if (!trimmed) {
-    const err = new Error('Please enter your email or username');
-    (err as any).code = 'auth/missing-email';
-    throw err;
-  }
-  if (!newPassword || newPassword.length < 6) {
-    const err = new Error('Password must be at least 6 characters long');
-    (err as any).code = 'auth/weak-password';
-    throw err;
-  }
-
-  // 1. Resolve registered email from username or email
-  const email = await resolveEmailFromIdentifier(trimmed);
-
-  // 2. If the user is currently authenticated with matching account, update password directly
-  if (auth.currentUser && auth.currentUser.email?.toLowerCase() === email.toLowerCase()) {
-    const { updatePassword } = await import('firebase/auth');
-    await updatePassword(auth.currentUser, newPassword);
-  }
-
-  return { success: true, email, username: trimmed };
-}
+export {
+  sendFirebasePasswordResetEmail,
+  verifyPasswordResetToken,
+  completePasswordReset,
+  formatLocalizedAuthError,
+} from './auth';

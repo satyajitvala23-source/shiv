@@ -96,7 +96,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
       case 'Document Required':
         return 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'Rejected':
-        return 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700';
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -105,19 +105,19 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
   return (
     <div
       id="application-details-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in"
       role="dialog"
       aria-modal="true"
     >
       <div
         id="application-details-modal-card"
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden text-left animate-in zoom-in-95"
+        className="glass-modal w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden text-left animate-in zoom-in-95"
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40">
+        <div className="p-4 sm:p-5 border-b border-slate-200/60 dark:border-white/10 flex items-center justify-between bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-800">
+              <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
                 {application.id}
               </span>
               <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${getStatusColor(application.status)}`}>
@@ -131,7 +131,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -240,7 +240,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                         doc.status === 'Verified'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300'
                           : doc.status === 'Needs Correction'
-                          ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300'
+                          ? 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300'
                           : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300'
                       }`}
                     >
@@ -354,7 +354,7 @@ export const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = (
                   <button
                     type="button"
                     onClick={handleQuickReject}
-                    className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs flex items-center gap-1 transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs flex items-center gap-1 transition-colors shadow-xs"
                   >
                     <XCircle className="w-3.5 h-3.5" />
                     <span>Reject</span>

@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { GOOGLE_MAPS_LOCATION_URL } from '../data/mockData';
 
 interface ChatMessage {
   id: string;
@@ -30,6 +31,7 @@ export const AIChatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize welcome message when language changes
@@ -103,16 +105,16 @@ export const AIChatbot: React.FC = () => {
         return {
           text: 'શિવ કમ્પ્યુટરનું અધિકૃત સરનામું:\nજૂના રેલવે ક્રોસિંગ પાસે, ચાર ચોક, કેશોદ – ૩૬૨૨૨૦, જૂનાગઢ જિલ્લો, ગુજરાત, ભારત.\nઓફિસ સમય: સોમવાર થી શનિવાર સવારે ૦૯:૦૦ થી રાત્રે ૦૮:૩૦ સુધી.',
           link: {
-            label: 'ગૂગલ મેપ્સ પર સરનામું જુઓ',
-            url: 'https://maps.google.com/?q=Near+Old+Railway+Crossing+Char+Chok+Keshod+Gujarat+362220',
+            label: 'ગૂગલ મેપ્સ પર લોકેશન જુઓ',
+            url: GOOGLE_MAPS_LOCATION_URL,
           },
         };
       }
       return {
         text: 'Official Office Address of Shiv Computer:\nNear Old Railway Crossing, Char Chok, Keshod – 362220, Gujarat, India.\nOffice Hours: Monday to Saturday 09:00 AM – 08:30 PM.',
         link: {
-          label: 'Open in Google Maps',
-          url: 'https://maps.google.com/?q=Near+Old+Railway+Crossing+Char+Chok+Keshod+Gujarat+362220',
+          label: 'View Location on Google Maps',
+          url: GOOGLE_MAPS_LOCATION_URL,
         },
       };
     }
@@ -201,6 +203,7 @@ export const AIChatbot: React.FC = () => {
 
     setMessages((prev) => [...prev, userMessage]);
     if (!textToSend) setInputValue('');
+    setIsTyping(true);
 
     // Simulate AI thinking and respond
     setTimeout(() => {
@@ -213,7 +216,8 @@ export const AIChatbot: React.FC = () => {
         link: response.link,
       };
       setMessages((prev) => [...prev, botMessage]);
-    }, 400);
+      setIsTyping(false);
+    }, 450);
   };
 
   const handleClearChat = () => {
@@ -243,7 +247,7 @@ export const AIChatbot: React.FC = () => {
             id="ai-chatbot-open-btn"
             type="button"
             onClick={() => setIsOpen(true)}
-            className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all"
+            className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-linear-to-r from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all border border-white/20 backdrop-blur-md"
             aria-label={t.aiChatbot.launcherText}
           >
             <div className="relative">
@@ -259,14 +263,14 @@ export const AIChatbot: React.FC = () => {
       {isOpen && (
         <div
           id="ai-chatbot-window"
-          className="fixed bottom-4 right-4 z-50 w-[92vw] sm:w-96 max-w-md h-[560px] max-h-[85vh] flex flex-col bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-5 duration-200"
+          className="glass-modal fixed bottom-4 right-4 z-50 w-[92vw] sm:w-96 max-w-md h-[560px] max-h-[85vh] flex flex-col rounded-3xl overflow-hidden animate-in slide-in-from-bottom-5 duration-200"
           role="dialog"
           aria-label={t.aiChatbot.title}
         >
           {/* Header */}
-          <div className="p-4 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-700 text-white flex items-center justify-between shrink-0 shadow-xs">
+          <div className="p-4 bg-linear-to-r from-blue-600/95 via-indigo-600/95 to-blue-700/95 backdrop-blur-md text-white flex items-center justify-between shrink-0 border-b border-white/15">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-white/15 backdrop-blur-xs flex items-center justify-center border border-white/20">
+              <div className="w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center border border-white/25 shadow-xs">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -285,7 +289,7 @@ export const AIChatbot: React.FC = () => {
                 type="button"
                 onClick={handleClearChat}
                 title={language === 'gu' ? 'વાતચીત ફરી શરૂ કરો' : 'Restart Chat'}
-                className="p-1.5 rounded-xl hover:bg-white/15 text-blue-100 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl hover:bg-white/20 text-blue-100 hover:text-white transition-colors active:scale-95"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -293,7 +297,7 @@ export const AIChatbot: React.FC = () => {
                 id="ai-chatbot-close-btn"
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-white/15 text-blue-100 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl hover:bg-white/20 text-blue-100 hover:text-white transition-colors active:scale-95"
                 aria-label={t.aiChatbot.closeButton}
               >
                 <X className="w-5 h-5" />
@@ -304,7 +308,7 @@ export const AIChatbot: React.FC = () => {
           {/* Messages Container */}
           <div
             id="ai-chatbot-messages"
-            className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/70 dark:bg-slate-950/60 text-xs sm:text-sm"
+            className="flex-1 overflow-y-auto p-4 space-y-3 bg-white/40 dark:bg-slate-950/40 backdrop-blur-xs text-xs sm:text-sm"
           >
             {messages.map((msg) => (
               <div
@@ -312,16 +316,16 @@ export const AIChatbot: React.FC = () => {
                 className={`flex gap-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.sender === 'bot' && (
-                  <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
 
                 <div
-                  className={`max-w-[82%] p-3 rounded-2xl space-y-2 shadow-xs ${
+                  className={`max-w-[82%] p-3 rounded-2xl space-y-2 shadow-xs transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-xs'
-                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/80 rounded-bl-xs'
+                      ? 'bg-gradient-to-r from-blue-600/95 to-indigo-600/95 text-white rounded-br-xs border border-white/15'
+                      : 'glass-card text-slate-800 dark:text-slate-100 rounded-bl-xs'
                   }`}
                 >
                   <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
@@ -352,19 +356,33 @@ export const AIChatbot: React.FC = () => {
                 </div>
 
                 {msg.sender === 'user' && (
-                  <div className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                     <User className="w-4 h-4" />
                   </div>
                 )}
               </div>
             ))}
 
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex gap-2.5 justify-start items-center">
+                <div className="w-7 h-7 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="glass-card px-4 py-2.5 rounded-2xl rounded-bl-xs flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Frequently Asked Questions Quick Chips */}
-          <div className="px-3 pt-2.5 pb-2 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 flex items-center gap-1">
+          <div className="px-3 pt-2.5 pb-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-t border-slate-200/60 dark:border-white/10 shrink-0">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-amber-500" />
               <span>{t.aiChatbot.quickQuestionsTitle}</span>
             </div>
@@ -374,7 +392,7 @@ export const AIChatbot: React.FC = () => {
                   key={idx}
                   type="button"
                   onClick={() => handleSendMessage(q)}
-                  className="shrink-0 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-blue-600 dark:hover:text-blue-300 text-[11px] font-medium text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 transition-colors truncate max-w-[220px]"
+                  className="shrink-0 px-2.5 py-1 rounded-xl bg-white/70 dark:bg-slate-800/70 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 hover:text-blue-600 dark:hover:text-blue-300 text-[11px] font-medium text-slate-700 dark:text-slate-300 border border-slate-200/70 dark:border-white/10 transition-all truncate max-w-[220px] active:scale-95 shadow-2xs"
                 >
                   {q}
                 </button>
@@ -388,7 +406,7 @@ export const AIChatbot: React.FC = () => {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 shrink-0"
+            className="p-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-t border-slate-200/60 dark:border-white/10 flex items-center gap-2 shrink-0"
           >
             <input
               id="ai-chatbot-input"
@@ -396,13 +414,13 @@ export const AIChatbot: React.FC = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={t.aiChatbot.inputPlaceholder}
-              className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white"
+              className="glass-input flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl outline-none text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
             <button
               id="ai-chatbot-send-btn"
               type="submit"
               disabled={!inputValue.trim()}
-              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors shrink-0"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-40 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition-all shrink-0 active:scale-95 border border-white/15"
               aria-label={t.aiChatbot.sendButton}
             >
               <Send className="w-4 h-4" />
@@ -411,8 +429,8 @@ export const AIChatbot: React.FC = () => {
           </form>
 
           {/* Center Disclaimer Footer */}
-          <div className="py-1 px-3 bg-slate-50 dark:bg-slate-950 text-center border-t border-slate-100 dark:border-slate-800/80">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+          <div className="py-1 px-3 bg-slate-100/50 dark:bg-slate-950/50 text-center border-t border-slate-200/40 dark:border-white/5">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               {t.aiChatbot.disclaimer}
             </span>
           </div>

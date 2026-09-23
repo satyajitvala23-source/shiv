@@ -132,6 +132,7 @@ export interface WebsiteContent {
   ownerName: string;
   whatsappNumber: string;
   address: string;
+  googleMapsUrl?: string;
   aboutUs: string;
 }
 
@@ -231,6 +232,23 @@ export interface TranslationStrings {
     backToLogin: string;
     resendLink: string;
     cancel: string;
+  };
+  resetPasswordModal?: {
+    title: string;
+    subtitle: string;
+    verifying: string;
+    emailLabel: string;
+    newPasswordLabel: string;
+    newPasswordPlaceholder: string;
+    confirmPasswordLabel: string;
+    confirmPasswordPlaceholder: string;
+    submitBtn: string;
+    submitting: string;
+    successExact: string;
+    loginBtn: string;
+    invalidLinkTitle: string;
+    invalidLinkDesc: string;
+    requestNewBtn: string;
   };
   securityNote: string;
   footerRights: string;
@@ -351,6 +369,7 @@ export interface TranslationStrings {
     whatsappButton: string;
     callButton: string;
     viewOnMap: string;
+    viewLocationOnGoogleMaps: string;
     workingHours: string;
     workingHoursVal: string;
     quickContact: string;

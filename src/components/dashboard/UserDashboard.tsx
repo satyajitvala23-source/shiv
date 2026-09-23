@@ -34,6 +34,8 @@ import { DashboardHeader } from './DashboardHeader';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ApplyServiceModal } from './ApplyServiceModal';
 import { OfficeAddressCard } from './OfficeAddressCard';
+import { QuickServiceCards } from './QuickServiceCards';
+import { AnimatedCounter } from '../AnimatedCounter';
 import { sendPasswordReset, resendVerificationEmail, auth } from '../../lib/firebase';
 
 type UserTab =
@@ -204,9 +206,9 @@ export const UserDashboard: React.FC = () => {
       case 'Pending':
         return 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800';
       case 'Document Required':
-        return 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800';
+        return 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800';
       case 'Rejected':
-        return 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700';
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -229,7 +231,7 @@ export const UserDashboard: React.FC = () => {
   ];
 
   return (
-    <div id="user-dashboard-container" className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+    <div id="user-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10">
       {/* Header */}
       <DashboardHeader
         role="user"
@@ -241,7 +243,7 @@ export const UserDashboard: React.FC = () => {
         {/* Left Sidebar */}
         <aside
           id="user-sidebar"
-          className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out ${
+          className={`glass-sidebar fixed lg:static inset-y-0 left-0 z-40 w-64 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
@@ -263,10 +265,10 @@ export const UserDashboard: React.FC = () => {
                     setActiveTab(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-xs shadow-blue-500/20'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-linear-to-r from-blue-600/90 to-sky-600/90 text-white shadow-md shadow-blue-500/25 border border-white/20 backdrop-blur-md'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white active:scale-98'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -288,12 +290,12 @@ export const UserDashboard: React.FC = () => {
           </div>
 
           {/* Bottom Logout */}
-          <div className="p-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="p-3 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               id="user-sidebar-logout-btn"
               onClick={logout}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50/80 dark:hover:bg-blue-900/30 transition-colors active:scale-98"
             >
               <LogOut className="w-4 h-4" />
               <span>{t.userSidebar.logout}</span>
@@ -304,7 +306,7 @@ export const UserDashboard: React.FC = () => {
         {/* Sidebar Backdrop on Mobile */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-xs lg:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm lg:hidden animate-in fade-in"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -315,7 +317,7 @@ export const UserDashboard: React.FC = () => {
           {auth?.currentUser && !auth.currentUser.emailVerified && (
             <div
               id="user-email-verification-banner"
-              className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              className="glass-card mb-6 p-4 rounded-2xl border-amber-500/30 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -358,26 +360,37 @@ export const UserDashboard: React.FC = () => {
           {/* TAB 1: USER DASHBOARD OVERVIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
-              {/* Welcome banner */}
-              <div className="p-6 rounded-3xl bg-linear-to-r from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-blue-100">
-                    {language === 'gu' ? 'શિવ કમ્પ્યુટર પોર્ટલમાં આપનું સ્વાગત છે' : 'Welcome back to Shiv Computer Portal'}
+              {/* Welcome banner - iPhone Glossy Glass with Royal Blue & Yellow Accents */}
+              <div className="p-6 rounded-3xl bg-linear-to-r from-blue-700 via-blue-600 to-sky-600 text-white shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+                {/* Gloss specular top sheen */}
+                <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/30 to-transparent pointer-events-none" />
+
+                <div className="space-y-1.5 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold uppercase tracking-wide shadow-xs flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                      CSC & Digital Gujarat Center
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-blue-100 hidden sm:inline">
+                      {language === 'gu' ? 'શિવ કમ્પ્યુટર' : 'Shiv Computer'}
+                    </span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+
+                  <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight drop-shadow-xs">
                     {language === 'gu' ? `નમસ્તે, ${currentUser.name || 'નાગરિક'}` : `Namaste, ${currentUser.name || 'Citizen'}`}
                   </h1>
-                  <p className="text-xs text-blue-100 max-w-lg">
+                  <p className="text-xs text-blue-100 max-w-lg leading-relaxed">
                     {language === 'gu'
                       ? 'તમારા સરકારી પ્રમાણપત્રો, કૃષિ સબસિડીઓ, જમીન રેકોર્ડનું સંચાલન કરો અને અધિકૃત ફોર્મ્સ ડાઉનલોડ કરો.'
                       : 'Manage your government certificates, agricultural subsidies, land records, and download official affidavit formats.'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-2 relative z-10 shrink-0">
                   <button
                     type="button"
                     onClick={() => setActiveTab('apply')}
-                    className="px-4 py-2.5 rounded-xl bg-white text-blue-700 font-bold text-xs hover:bg-blue-50 shadow-xs flex items-center gap-1.5 transition-all"
+                    className="btn-glossy-secondary px-4 py-2.5 rounded-xl text-blue-700 font-bold text-xs flex items-center gap-1.5 active:scale-95"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{t.userSidebar.applyForService}</span>
@@ -387,68 +400,92 @@ export const UserDashboard: React.FC = () => {
 
               {/* Status Summary KPI Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'મારી અરજીઓ' : 'My Applications'}</div>
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalUserApps}</div>
-                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">{language === 'gu' ? 'સબમિટ કરેલ' : 'Submitted'}</div>
+                <div className="glass-card p-4 rounded-2xl flex flex-col justify-between">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {language === 'gu' ? 'મારી અરજીઓ' : 'My Applications'}
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mt-2">
+                    <AnimatedCounter value={totalUserApps} />
+                  </div>
+                  <div className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-1">
+                    {language === 'gu' ? 'સબમિટ કરેલ' : 'Submitted'}
+                  </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'In Progress'}</div>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                    {pendingUserApps + processingUserApps}
+                <div className="glass-card p-4 rounded-2xl flex flex-col justify-between">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'In Progress'}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">{language === 'gu' ? 'વિભાગ તપાસ હેઠળ' : 'Under department check'}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+                    <AnimatedCounter value={pendingUserApps + processingUserApps} />
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    {language === 'gu' ? 'વિભાગ તપાસ હેઠળ' : 'Under department check'}
+                  </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}</div>
-                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                    {approvedUserApps}
+                <div className="glass-card p-4 rounded-2xl flex flex-col justify-between">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}
                   </div>
-                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'પ્રમાણપત્ર તૈયાર' : 'Ready for collection'}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
+                    <AnimatedCounter value={approvedUserApps} />
+                  </div>
+                  <div className="text-[11px] text-emerald-500 font-medium mt-1">
+                    {language === 'gu' ? 'પ્રમાણપત્ર તૈયાર' : 'Ready for collection'}
+                  </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'ચુકવણીઓ' : 'Payments Made'}</div>
-                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                    ₹{userPayments.reduce((acc, p) => acc + p.amount, 0)}
+                <div className="glass-card p-4 rounded-2xl flex flex-col justify-between">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {language === 'gu' ? 'ચુકવણીઓ' : 'Payments Made'}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">{userPayments.length} {language === 'gu' ? 'વ્યવહારો' : 'transactions'}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-300 mt-2 flex items-baseline gap-0.5">
+                    <span>₹</span>
+                    <AnimatedCounter value={userPayments.reduce((acc, p) => acc + p.amount, 0)} />
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                    {userPayments.length} {language === 'gu' ? 'વ્યવહારો' : 'transactions'}
+                  </div>
                 </div>
               </div>
 
+              {/* CORE CENTER SERVICES (10 Requested Services in Blue/White Glass + Bright Yellow) */}
+              <QuickServiceCards onSelectService={(service) => setServiceToApply(service)} />
+
               {/* Quick Tracker Search */}
-              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div className="glass-card p-5 rounded-2xl space-y-3">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-blue-600" />
                   <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
-                    Instant Application Status Tracker
+                    {language === 'gu' ? 'ત્વરિત અરજી સ્થિતિ ટ્રેકર' : 'Instant Application Status Tracker'}
                   </h3>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Enter your Application Tracking ID to view current stage and department remarks.
+                  {language === 'gu'
+                    ? 'તમારી વર્તમાન સ્થિતિ અને સરકારી નોંધો જોવા માટે એપ્લિકેશન ટ્રેકિંગ ID દાખલ કરો.'
+                    : 'Enter your Application Tracking ID to view current stage and department remarks.'}
                 </p>
 
                 <form onSubmit={handleTrackSubmit} className="flex gap-2 max-w-lg">
                   <input
                     type="text"
-                    placeholder="Enter Application ID..."
+                    placeholder={language === 'gu' ? 'અરજી ID દાખલ કરો...' : 'Enter Application ID...'}
                     value={trackSearchId}
                     onChange={(e) => setTrackSearchId(e.target.value)}
-                    className="flex-1 px-3.5 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="glass-input flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl outline-none"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition-colors"
+                    className="px-4 py-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 border border-white/20 transition-all active:scale-95 shrink-0"
                   >
-                    <span>Track</span>
+                    <span>{language === 'gu' ? 'ટ્રેક કરો' : 'Track'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </form>
 
                 {trackedApp && (
-                  <div className="mt-3 p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                  <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs font-bold text-blue-700 dark:text-blue-300">
@@ -569,50 +606,65 @@ export const UserDashboard: React.FC = () => {
           {activeTab === 'apply' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Apply for Citizen & e-Governance Services
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Apply for Citizen & e-Governance Services</span>
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Select a government certificate or assistance service below to submit an online application with Shiv Computer.
+                  Select a government certificate, travel booking, or assistance service below to submit an online application with Shiv Computer.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {services.filter((s) => s.enabled).map((service) => (
-                  <div
-                    key={service.id}
-                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-blue-600 font-semibold mb-1">
-                        <span>{service.department}</span>
-                        <span className="font-bold text-slate-900 dark:text-white">₹{service.fee}</span>
-                      </div>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                        {service.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                        {service.description}
-                      </p>
+              {/* 10 Highlighted Center Services in Blue/Yellow Glass Cards */}
+              <QuickServiceCards onSelectService={(service) => setServiceToApply(service)} />
 
-                      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1 text-slate-600 dark:text-slate-400">
-                        <div>Processing: <strong>{service.processingTime}</strong></div>
-                        <div className="text-[11px] text-slate-400 truncate">
-                          Required: {service.requiredDocuments.join(', ')}
+              <div className="pt-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-1.5 h-4 rounded-full bg-blue-600" />
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Detailed Services Catalog
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {services.filter((s) => s.enabled).map((service) => (
+                    <div
+                      key={service.id}
+                      className="service-gloss-card p-5 flex flex-col justify-between space-y-4"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-blue-600 dark:text-sky-400 font-bold mb-1">
+                          <span className="truncate pr-2">{service.department}</span>
+                          <span className="font-extrabold text-slate-900 dark:text-amber-300 bg-amber-400/15 dark:bg-amber-400/20 px-2 py-0.5 rounded-full border border-amber-400/30 shrink-0">
+                            ₹{service.fee}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                          {service.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                          {service.description}
+                        </p>
+
+                        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 text-xs space-y-1 text-slate-600 dark:text-slate-400">
+                          <div>Processing: <strong className="text-slate-800 dark:text-slate-200">{service.processingTime}</strong></div>
+                          <div className="text-[11px] text-slate-400 truncate">
+                            Required: {service.requiredDocuments.join(', ')}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setServiceToApply(service)}
-                      className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                    >
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => setServiceToApply(service)}
+                        className="btn-glossy-primary w-full py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-98"
+                      >
+                        <span>Apply Now</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -788,19 +840,39 @@ export const UserDashboard: React.FC = () => {
                 {forms.filter((f) => f.enabled).map((form) => (
                   <div
                     key={form.id}
-                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4"
+                    className="glass-card p-5 rounded-2xl flex flex-col justify-between space-y-4 group transition-all"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold mb-1">
-                        <span className="uppercase">{form.category}</span>
-                        <span>{form.fileSize}</span>
+                      <div className="flex items-center justify-between text-[11px] font-semibold mb-3">
+                        <span className="uppercase px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-mono text-[10px]">
+                          {form.category}
+                        </span>
+                        <span className="text-slate-400 font-mono">{form.fileSize}</span>
                       </div>
-                      <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
-                        {form.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {form.description}
-                      </p>
+
+                      <div className="flex items-start gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-blue-500/20 to-sky-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {form.title}
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            {form.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-blue-500" />
+                          <span>{language === 'gu' ? 'સરકારી નમૂનો' : 'Govt Approved'}</span>
+                        </div>
+                        <span className="font-medium text-blue-600 dark:text-blue-400 font-mono">
+                          {form.downloadCount} {language === 'gu' ? 'ડાઉનલોડ્સ' : 'downloads'}
+                        </span>
+                      </div>
                     </div>
 
                     <button
@@ -809,10 +881,10 @@ export const UserDashboard: React.FC = () => {
                         incrementFormDownload(form.id);
                         alert(`Downloading official PDF form: ${form.title}`);
                       }}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 border border-white/20 transition-all active:scale-95"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Download PDF Form</span>
+                      <Download className="w-4 h-4" />
+                      <span>{language === 'gu' ? 'પીડીએફ ફોર્મ ડાઉનલોડ કરો' : 'Download PDF Form'}</span>
                     </button>
                   </div>
                 ))}
@@ -939,7 +1011,7 @@ export const UserDashboard: React.FC = () => {
                           app.status === 'Approved' || app.status === 'Completed'
                             ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-semibold'
                             : app.status === 'Rejected'
-                            ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 font-semibold'
+                            ? 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
                         }`}>
                           <Check className="w-4 h-4 mx-auto mb-1" />
@@ -1264,13 +1336,13 @@ export const UserDashboard: React.FC = () => {
                     className={`p-3 rounded-xl border text-xs flex items-start gap-2 ${
                       resetStatus.type === 'success'
                         ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-                        : 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                        : 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200'
                     }`}
                   >
                     {resetStatus.type === 'success' ? (
                       <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     )}
                     <span>{resetStatus.message}</span>
                   </div>

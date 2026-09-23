@@ -223,7 +223,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveDoc(idx)}
-                    className="text-slate-400 hover:text-rose-600 transition-colors"
+                    className="text-slate-400 hover:text-amber-600 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

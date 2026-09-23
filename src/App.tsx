@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { AdminDashboard } from './components/dashboard/AdminDashboard';
 import { UserDashboard } from './components/dashboard/UserDashboard';
 import { LoginForm } from './components/LoginForm';
 import { HeaderControls } from './components/HeaderControls';
 import { ForgotPasswordModal } from './components/ForgotPasswordModal';
+import { ResetPasswordModal } from './components/ResetPasswordModal';
 import { AIChatbot } from './components/AIChatbot';
+import { DynamicGlassBackground } from './components/DynamicGlassBackground';
 
 function AppContent() {
   const {
@@ -23,6 +25,34 @@ function AppContent() {
 
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotInitialIdentifier, setForgotInitialIdentifier] = useState('');
+
+  // Firebase Password Reset Action Code handler
+  const [resetCode, setResetCode] = useState<string | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+  // Detect Firebase password reset query parameters (mode=resetPassword & oobCode=...)
+  useEffect(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      let mode = searchParams.get('mode');
+      let oobCode = searchParams.get('oobCode');
+
+      // Also check hash query params if routed via #/?mode=resetPassword&oobCode=...
+      if (!oobCode && window.location.hash.includes('?')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        const hashParams = new URLSearchParams(hashQuery);
+        if (!mode) mode = hashParams.get('mode');
+        if (!oobCode) oobCode = hashParams.get('oobCode');
+      }
+
+      if (mode === 'resetPassword' && oobCode) {
+        setResetCode(oobCode);
+        setIsResetModalOpen(true);
+      }
+    } catch {
+      // Ignore parsing errors
+    }
+  }, []);
 
   if (authLoading) {
     return (
@@ -99,6 +129,30 @@ function AppContent() {
           language={language}
           t={t}
         />
+
+        <ResetPasswordModal
+          isOpen={isResetModalOpen}
+          oobCode={resetCode || ''}
+          onClose={() => {
+            setIsResetModalOpen(false);
+            setResetCode(null);
+          }}
+          onSuccessLogin={() => {
+            setIsResetModalOpen(false);
+            setResetCode(null);
+            setSelectedRole('user');
+            setCurrentView('login');
+            window.location.hash = '#/login';
+          }}
+          onRequestNewLink={() => {
+            setIsResetModalOpen(false);
+            setResetCode(null);
+            setIsForgotModalOpen(true);
+          }}
+          language={language}
+          t={t}
+        />
+
         <AIChatbot />
       </div>
     );
@@ -107,11 +161,41 @@ function AppContent() {
   // Strict RBAC protection: Only users with role === 'admin' can access Admin Dashboard
   return (
     <>
+      <DynamicGlassBackground />
       {currentView === 'admin-dashboard' && authRole === 'admin' ? (
         <AdminDashboard />
       ) : (
         <UserDashboard />
       )}
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+        initialIdentifier={forgotInitialIdentifier}
+        language={language}
+        t={t}
+      />
+      <ResetPasswordModal
+        isOpen={isResetModalOpen}
+        oobCode={resetCode || ''}
+        onClose={() => {
+          setIsResetModalOpen(false);
+          setResetCode(null);
+        }}
+        onSuccessLogin={() => {
+          setIsResetModalOpen(false);
+          setResetCode(null);
+          setSelectedRole('user');
+          setCurrentView('login');
+          window.location.hash = '#/login';
+        }}
+        onRequestNewLink={() => {
+          setIsResetModalOpen(false);
+          setResetCode(null);
+          setIsForgotModalOpen(true);
+        }}
+        language={language}
+        t={t}
+      />
       <AIChatbot />
     </>
   );

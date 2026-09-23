@@ -46,6 +46,7 @@ import { ApplicationDetailsModal } from './ApplicationDetailsModal';
 import { ServiceModal } from './ServiceModal';
 import { FormModal } from './FormModal';
 import { OfficeAddressCard } from './OfficeAddressCard';
+import { AnimatedCounter } from '../AnimatedCounter';
 
 type AdminTab =
   | 'dashboard'
@@ -151,7 +152,7 @@ export const AdminDashboard: React.FC = () => {
   // Selected customer for drill-down profile inspection
   const [inspectedUser, setInspectedUser] = useState<CustomerUser | null>(null);
 
-  // KPI Calculations
+  // KPI Calculations & Requirement 4 Statistics
   const totalApps = applications.length;
   const pendingApps = applications.filter((a) => a.status === 'Pending').length;
   const processingApps = applications.filter((a) => a.status === 'Processing').length;
@@ -160,6 +161,12 @@ export const AdminDashboard: React.FC = () => {
   const totalRevenue = payments
     .filter((p) => p.status === 'Successful')
     .reduce((acc, curr) => acc + curr.amount, 0);
+
+  // Dynamic statistics from existing Firestore collections
+  const totalUsers = users.length;
+  const totalDocuments = forms.length + applications.reduce((acc, a) => acc + (a.uploadedDocuments?.length || 0), 0);
+  const totalDownloads = forms.reduce((acc, f) => acc + (f.downloadCount || 0), 0);
+  const totalApplications = applications.length;
 
   // Application filtering
   const filteredApplications = applications.filter((app) => {
@@ -222,7 +229,7 @@ export const AdminDashboard: React.FC = () => {
       case 'Document Required':
         return 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'Rejected':
-        return 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800';
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700';
       default:
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -246,7 +253,7 @@ export const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div id="admin-dashboard-container" className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+    <div id="admin-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10">
       {/* Header */}
       <DashboardHeader
         role="admin"
@@ -258,7 +265,7 @@ export const AdminDashboard: React.FC = () => {
         {/* Left Sidebar */}
         <aside
           id="admin-sidebar"
-          className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out ${
+          className={`glass-sidebar fixed lg:static inset-y-0 left-0 z-40 w-64 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
@@ -280,10 +287,10 @@ export const AdminDashboard: React.FC = () => {
                     setActiveTab(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-xs shadow-blue-500/20'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-linear-to-r from-blue-600/90 to-sky-600/90 text-white shadow-md shadow-blue-500/25 border border-white/20 backdrop-blur-md'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white active:scale-98'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -305,12 +312,12 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Bottom Logout */}
-          <div className="p-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="p-3 border-t border-slate-200/60 dark:border-white/10">
             <button
               type="button"
               id="admin-sidebar-logout-btn"
               onClick={logout}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-blue-50/80 dark:hover:bg-blue-900/30 transition-colors active:scale-98"
             >
               <LogOut className="w-4 h-4" />
               <span>{t.adminSidebar.logout}</span>
@@ -321,7 +328,7 @@ export const AdminDashboard: React.FC = () => {
         {/* Sidebar Backdrop on Mobile */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-xs lg:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm lg:hidden animate-in fade-in"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -334,92 +341,180 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Administrator Command Center
+                    {language === 'gu' ? 'એડમિનિસ્ટ્રેટર કમાન્ડ સેન્ટર' : 'Administrator Command Center'}
                   </h1>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                    Real-time metrics, citizen applications queue, and service health for Shiv Computer.
+                    {language === 'gu'
+                      ? 'શિવ કમ્પ્યુટર માટે રીઅલ-ટાઇમ આંકડા, અરજીઓની કતાર અને સેવા સ્થિતિ.'
+                      : 'Real-time metrics, citizen applications queue, and service health for Shiv Computer.'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setActiveTab('applications')}
-                    className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs"
+                    className="px-3.5 py-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all border border-white/20"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5" />
-                    <span>View All Applications</span>
+                    <span>{language === 'gu' ? 'બધી અરજીઓ જુઓ' : 'View All Applications'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* KPI Metrics Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'કુલ અરજીઓ' : 'Total Applications'}</div>
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{totalApps}</div>
-                  <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">{language === 'gu' ? 'કુલ સક્રિય' : 'Active Queue'}</div>
+              {/* Requirement 4: Primary Dynamic Statistics Cards from Firestore */}
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>{language === 'gu' ? 'મુખ્ય આંકડાઓ' : 'Core Key Performance Indicators'}</span>
                 </div>
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {/* Total Users */}
+                  <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {language === 'gu' ? 'કુલ વપરાશકર્તાઓ' : 'Total Users'}
+                      </span>
+                      <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20">
+                        <Users className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-black text-slate-900 dark:text-white mt-3">
+                      <AnimatedCounter value={totalUsers} />
+                    </div>
+                    <div className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-1">
+                      {language === 'gu' ? 'નોંધાયેલ નાગરિક એકાઉન્ટ્સ' : 'Registered citizen profiles'}
+                    </div>
+                  </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')}</div>
-                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{pendingApps}</div>
+                  {/* Total Documents */}
+                  <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {language === 'gu' ? 'કુલ દસ્તાવેજો' : 'Total Documents'}
+                      </span>
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20">
+                        <FolderOpen className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-black text-slate-900 dark:text-white mt-3">
+                      <AnimatedCounter value={totalDocuments} />
+                    </div>
+                    <div className="text-[11px] text-purple-600 dark:text-purple-400 font-medium mt-1">
+                      {language === 'gu' ? 'ફોર્મ્સ અને અપલોડ કરેલા કાગળો' : 'Forms & uploaded files'}
+                    </div>
+                  </div>
+
+                  {/* Total Downloads */}
+                  <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {language === 'gu' ? 'કુલ ડાઉનલોડ' : 'Total Downloads'}
+                      </span>
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                        <Download className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-3">
+                      <AnimatedCounter value={totalDownloads} />
+                    </div>
+                    <div className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90 font-medium mt-1">
+                      {language === 'gu' ? 'સરકારી ફોર્મ નકલ' : 'Official PDF downloads'}
+                    </div>
+                  </div>
+
+                  {/* Applications */}
+                  <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {language === 'gu' ? 'અરજીઓ' : 'Applications'}
+                      </span>
+                      <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+                        <FileSpreadsheet className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-black text-slate-900 dark:text-white mt-3">
+                      <AnimatedCounter value={totalApplications} />
+                    </div>
+                    <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium mt-1">
+                      {language === 'gu' ? 'કુલ સબમિટ થયેલ અરજીઓ' : 'Total citizen requests'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Breakdown & Revenue Secondary Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="glass-card p-4 rounded-2xl">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')}
+                  </div>
+                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                    <AnimatedCounter value={pendingApps} />
+                  </div>
                   <div className="text-[11px] text-amber-500 mt-0.5">{language === 'gu' ? 'તપાસ બાકી' : 'Requires Verification'}</div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing')}</div>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{processingApps}</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">{language === 'gu' ? 'સરકારી વિભાગમાં' : 'With Govt Office'}</div>
+                <div className="glass-card p-4 rounded-2xl">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {t?.status?.processing || (language === 'gu' ? 'પ્રક્રિયા હેઠળ' : 'Processing')}
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+                    <AnimatedCounter value={processingApps} />
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{language === 'gu' ? 'સરકારી વિભાગમાં' : 'With Govt Office'}</div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}</div>
-                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{approvedApps}</div>
-                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'મંજૂર થયેલ' : 'Certificate Issued'}</div>
+                <div className="glass-card p-4 rounded-2xl">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {t?.status?.approved || (language === 'gu' ? 'મંજૂર' : 'Approved')}
+                  </div>
+                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                    <AnimatedCounter value={approvedApps} />
+                  </div>
+                  <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'પ્રમાણપત્ર તૈયાર' : 'Certificate Issued'}</div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'નોંધાયેલા નાગરિકો' : 'Registered Users'}</div>
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{users.length}</div>
-                  <div className="text-[11px] text-indigo-500 mt-0.5">{language === 'gu' ? 'કેશોદ / જૂનાગઢ' : 'Citizens in Junagadh'}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase">{language === 'gu' ? 'કુલ આવક' : 'Total Revenue'}</div>
-                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">₹{totalRevenue}</div>
+                <div className="glass-card p-4 rounded-2xl">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
+                    {language === 'gu' ? 'કુલ આવક' : 'Total Revenue'}
+                  </div>
+                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1 flex items-baseline gap-0.5">
+                    <span>₹</span>
+                    <AnimatedCounter value={totalRevenue} />
+                  </div>
                   <div className="text-[11px] text-emerald-500 mt-0.5">{language === 'gu' ? 'UPI / રોકડ' : 'Paid via UPI / Cash'}</div>
                 </div>
               </div>
 
               {/* Second row: Quick Services & Forms overview */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+                <div className="glass-card p-5 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <Layers className="w-4 h-4 text-blue-600" />
-                      <span>Citizen & Agri Services</span>
+                      <span>{language === 'gu' ? 'નાગરિક અને કૃષિ સેવાઓ' : 'Citizen & Agri Services'}</span>
                     </h3>
-                    <span className="text-xs text-blue-600 font-semibold">{services.length + agricultureServices.length} Total</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">{services.length + agricultureServices.length} Total</span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Active services available on the portal: {services.filter((s) => s.enabled).length} General and {agricultureServices.filter((s) => s.enabled).length} iKhedut agriculture schemes.
+                    Active services on portal: {services.filter((s) => s.enabled).length} General and {agricultureServices.filter((s) => s.enabled).length} iKhedut agriculture schemes.
                   </p>
                   <button
                     type="button"
                     onClick={() => setActiveTab('services')}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 active:scale-95 transition-all"
                   >
-                    <span>Manage Services Catalog →</span>
+                    <span>{language === 'gu' ? 'સેવાઓનું સંચાલન કરો →' : 'Manage Services Catalog →'}</span>
                   </button>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+                <div className="glass-card p-5 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <FileText className="w-4 h-4 text-emerald-600" />
-                      <span>Forms Repository</span>
+                      <span>{language === 'gu' ? 'ફોર્મ્સ ભંડાર' : 'Forms Repository'}</span>
                     </h3>
-                    <span className="text-xs text-emerald-600 font-semibold">{forms.length} Templates</span>
+                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{forms.length} Templates</span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Official affidavits and application forms downloaded {forms.reduce((acc, f) => acc + f.downloadCount, 0)} times by citizens.
@@ -427,19 +522,19 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('forms')}
-                    className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                    className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 flex items-center gap-1 active:scale-95 transition-all"
                   >
-                    <span>Manage Downloadable Forms →</span>
+                    <span>{language === 'gu' ? 'ડાઉનલોડેબલ ફોર્મ્સ જુઓ →' : 'Manage Downloadable Forms →'}</span>
                   </button>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+                <div className="glass-card p-5 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <Bell className="w-4 h-4 text-purple-600" />
-                      <span>Broadcast Announcements</span>
+                      <span>{language === 'gu' ? 'જાહેરાતો' : 'Broadcast Announcements'}</span>
                     </h3>
-                    <span className="text-xs text-purple-600 font-semibold">{notifications.length} Active</span>
+                    <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold">{notifications.length} Active</span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Send push notices and portal announcements to users regarding scheme dates and deadlines.
@@ -447,24 +542,24 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('notifications')}
-                    className="text-xs font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-1"
+                    className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 flex items-center gap-1 active:scale-95 transition-all"
                   >
-                    <span>Create Announcement →</span>
+                    <span>{language === 'gu' ? 'નવી જાહેરાત બનાવો →' : 'Create Announcement →'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Recent Applications Quick Queue */}
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="glass-card rounded-2xl overflow-hidden">
+                <div className="p-4 sm:p-5 border-b border-slate-200/60 dark:border-white/10 flex items-center justify-between">
                   <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4 text-blue-600" />
-                    <span>Recent Applications (Click to Review)</span>
+                    <span>{language === 'gu' ? 'તાજેતરની અરજીઓ (સમીક્ષા કરવા ક્લિક કરો)' : 'Recent Applications (Click to Review)'}</span>
                   </h3>
                   <button
                     type="button"
                     onClick={() => setActiveTab('applications')}
-                    className="text-xs font-semibold text-blue-600 hover:underline"
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     View All {applications.length}
                   </button>
@@ -763,7 +858,7 @@ export const AdminDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => deleteService(service.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
                           title="Delete Service"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -869,7 +964,7 @@ export const AdminDashboard: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => deleteService(service.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
                           title="Delete Scheme"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -966,7 +1061,7 @@ export const AdminDashboard: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => deleteForm(form.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                                 title="Delete Form"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1057,7 +1152,7 @@ export const AdminDashboard: React.FC = () => {
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors ${
                                 user.status === 'Active'
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                                  : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
                               }`}
                             >
                               {user.status}
@@ -1163,7 +1258,7 @@ export const AdminDashboard: React.FC = () => {
                                 doc.status === 'Verified'
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : doc.status === 'Needs Correction'
-                                  ? 'bg-rose-100 text-rose-800'
+                                  ? 'bg-amber-100 text-amber-800'
                                   : 'bg-blue-100 text-blue-800'
                               }`}
                             >
@@ -1386,7 +1481,7 @@ export const AdminDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => deleteNotification(n.id)}
-                        className="text-slate-400 hover:text-rose-600 p-1"
+                        className="text-slate-400 hover:text-amber-600 p-1"
                         title="Delete Announcement"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1472,12 +1567,12 @@ export const AdminDashboard: React.FC = () => {
 
                     <div>
                       <div className="flex justify-between mb-1">
-                        <span className="font-medium text-rose-600">Rejected / Duplicate</span>
+                        <span className="font-medium text-slate-600 dark:text-slate-400">Rejected / Duplicate</span>
                         <span className="font-bold">{rejectedApps} ({Math.round((rejectedApps / (totalApps || 1)) * 100)}%)</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div
-                          className="h-full bg-rose-500 rounded-full"
+                          className="h-full bg-slate-400 dark:bg-slate-600 rounded-full"
                           style={{ width: `${(rejectedApps / (totalApps || 1)) * 100}%` }}
                         />
                       </div>
@@ -1610,6 +1705,19 @@ export const AdminDashboard: React.FC = () => {
                       value={editableWeb.address}
                       onChange={(e) => setEditableWeb({ ...editableWeb, address: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Google Maps Location URL
+                    </label>
+                    <input
+                      type="url"
+                      value={editableWeb.googleMapsUrl || ''}
+                      onChange={(e) => setEditableWeb({ ...editableWeb, googleMapsUrl: e.target.value })}
+                      placeholder="https://maps.app.goo.gl/Qp12UPnnrWvBTeQQ8?g_st=ac8"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none text-xs"
                     />
                   </div>
 

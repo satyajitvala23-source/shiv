@@ -17,6 +17,8 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
   sendEmailVerification,
   User as FirebaseUser,
   updateProfile,
@@ -63,11 +65,15 @@ export function formatAuthError(error: any): string {
     case 'auth/invalid-credential':
       return 'Incorrect email or password. Please try again.';
     case 'auth/user-not-found':
-      return 'No account found with this email. Please register for a free account.';
+      return 'No account found with this email. Please check your registered email or register for a new account.';
     case 'auth/weak-password':
       return 'Password must be at least 6 characters long.';
     case 'auth/network-request-failed':
       return 'Network connection error. Please check your internet connection.';
+    case 'auth/invalid-action-code':
+      return 'This password reset link is invalid or has already been used. Please request a new link.';
+    case 'auth/expired-action-code':
+      return 'This password reset link has expired. Please request a new password reset email.';
     case 'ADMIN_ACCESS_DENIED':
     case 'auth/admin-access-denied':
       return 'Access Denied: This account does not have administrator privileges. Please sign in with an authorized admin account.';
@@ -76,15 +82,56 @@ export function formatAuthError(error: any): string {
     case 'auth/user-disabled':
       return 'Your account has been deactivated. Please contact Shiv Computer support.';
     case 'auth/too-many-requests':
-      return 'Too many failed attempts. Please wait a few moments before trying again.';
+      return 'Too many attempts. Please wait a few moments before trying again.';
     case 'auth/missing-email':
       return 'Please enter your registered email address.';
     default:
       if (typeof error?.message === 'string' && error.message && !error.message.includes('Firebase') && !error.message.includes('auth/')) {
         return error.message;
       }
-      return 'Authentication failed. Please check your credentials and try again.';
+      return 'Authentication operation failed. Please check your details and try again.';
   }
+}
+
+/**
+ * Localized error formatter for English and Gujarati
+ */
+export function formatLocalizedAuthError(error: any, language: 'en' | 'gu' = 'en'): string {
+  const code = error?.code || (typeof error?.message === 'string' ? error.message : '');
+
+  if (language === 'gu') {
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return 'આ ઈમેલ પહેલેથી જ નોંધાયેલ છે. કૃપા કરીને લૉગ ઇન કરો.';
+      case 'auth/invalid-email':
+        return 'કૃપા કરીને માન્ય ઈમેલ સરનામું દાખલ કરો.';
+      case 'auth/wrong-password':
+        return 'ખોટો પાસવર્ડ. કૃપા કરીને તમારો પાસવર્ડ તપાસો અથવા પાસવર્ડ ભૂલી ગયા લિંક વાપરો.';
+      case 'auth/invalid-credential':
+        return 'ખોટો ઈમેલ અથવા પાસવર્ડ. કૃપા કરીને ફરી પ્રયાસ કરો.';
+      case 'auth/user-not-found':
+        return 'આ ઈમેલ સાથે કોઈ ખાતું મળ્યું નથી. કૃપા કરીને તમારો નોંધાયેલ ઈમેલ તપાસો.';
+      case 'auth/weak-password':
+        return 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરોનો હોવો જોઈએ.';
+      case 'auth/network-request-failed':
+        return 'નેટવર્ક કનેક્શન સમસ્યા. કૃપા કરીને તમારું ઇન્ટરનેટ કનેક્શન તપાસો.';
+      case 'auth/invalid-action-code':
+        return 'આ પાસવર્ડ રીસેટ લિંક અમાન્ય છે અથવા પહેલેથી જ વપરાઈ ચૂકી છે. કૃપા કરીને નવી લિંક મેળવો.';
+      case 'auth/expired-action-code':
+        return 'આ પાસવર્ડ રીસેટ લિંક સમાપ્ત થઈ ગઈ છે. કૃપા કરીને નવી પાસવર્ડ રીસેટ લિંકની વિનંતી કરો.';
+      case 'auth/too-many-requests':
+        return 'ઘણી બધી વિનંતીઓ કરવામાં આવી છે. કૃપા કરીને થોડી ક્ષણો રાહ જુઓ.';
+      case 'auth/missing-email':
+        return 'કૃપા કરીને તમારું નોંધાયેલ ઈમેલ સરનામું દાખલ કરો.';
+      default:
+        if (typeof error?.message === 'string' && error.message && !error.message.includes('Firebase') && !error.message.includes('auth/')) {
+          return error.message;
+        }
+        return 'ઓથેન્ટિકેશનમાં સમસ્યા આવી. કૃપા કરીને વિગતો તપાસી ફરી પ્રયાસ કરો.';
+    }
+  }
+
+  return formatAuthError(error);
 }
 
 /**
@@ -436,19 +483,110 @@ export async function signOutUser(): Promise<void> {
 }
 
 /**
- * 5. Password Reset Email via Firebase Auth
+ * 5. Secure Password Reset via Firebase Auth
+ * 
+ * Strict Compliance:
+ * - Uses Firebase Authentication sendPasswordResetEmail()
+ * - Uses Firebase Authentication verifyPasswordResetCode() & confirmPasswordReset()
+ * - NEVER stores plain-text or reset passwords in Firestore, Realtime Database,
+ *   localStorage, cookies, or any client storage.
+ * - Relies on registered email in Firebase Authentication as account identity.
+ */
+
+/**
+ * Send official Firebase password reset email to the user's registered email
+ */
+export async function sendFirebasePasswordResetEmail(
+  rawEmailOrIdentifier: string
+): Promise<{ success: boolean; email: string }> {
+  const trimmed = (rawEmailOrIdentifier || '').trim();
+  if (!trimmed) {
+    const err: any = new Error('Please enter your registered email address.');
+    err.code = 'auth/missing-email';
+    throw err;
+  }
+
+  // Resolve identifier if user typed their registered username
+  const email = await resolveEmailFromIdentifier(trimmed);
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    const err: any = new Error('Please enter a valid email address.');
+    err.code = 'auth/invalid-email';
+    throw err;
+  }
+
+  // Dispatch password reset email via Firebase Authentication
+  // Pass current origin so when supported, the link directs back to Shiv Computer
+  try {
+    const actionCodeSettings = {
+      url: window.location.origin,
+      handleCodeInApp: true,
+    };
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+  } catch (optErr: any) {
+    // Fall back to standard sendPasswordResetEmail if custom actionCodeSettings domain is pending
+    if (optErr?.code === 'auth/unauthorized-continue-uri' || optErr?.code === 'auth/invalid-continue-uri') {
+      await sendPasswordResetEmail(auth, email);
+    } else {
+      throw optErr;
+    }
+  }
+
+  return { success: true, email };
+}
+
+/**
+ * Backwards-compatibility wrapper for sendFirebasePasswordReset
  */
 export async function sendFirebasePasswordReset(
   identifierOrEmail: string
 ): Promise<{ success: boolean; email: string; directResetUrl: string }> {
-  const email = await resolveEmailFromIdentifier(identifierOrEmail);
-
+  const res = await sendFirebasePasswordResetEmail(identifierOrEmail);
   const directResetUrl = `https://${AUTH_DOMAIN}/__/auth/action?mode=resetPassword&email=${encodeURIComponent(
-    email
+    res.email
   )}`;
+  return { success: true, email: res.email, directResetUrl };
+}
 
-  await sendPasswordResetEmail(auth, email);
-  return { success: true, email, directResetUrl };
+/**
+ * Verify password reset action code from Firebase link
+ */
+export async function verifyPasswordResetToken(oobCode: string): Promise<string> {
+  if (!oobCode || typeof oobCode !== 'string') {
+    const err: any = new Error('Invalid or missing password reset code.');
+    err.code = 'auth/invalid-action-code';
+    throw err;
+  }
+
+  return await verifyPasswordResetCode(auth, oobCode);
+}
+
+/**
+ * Securely confirm new password via Firebase Authentication
+ */
+export async function completePasswordReset(
+  oobCode: string,
+  newPassword: string
+): Promise<{ success: boolean }> {
+  if (!oobCode || typeof oobCode !== 'string') {
+    const err: any = new Error('Invalid or missing password reset code.');
+    err.code = 'auth/invalid-action-code';
+    throw err;
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    const err: any = new Error('Password must be at least 6 characters long.');
+    err.code = 'auth/weak-password';
+    throw err;
+  }
+
+  // Firebase Authentication updates the account password directly and securely
+  // No plain-text passwords or tokens are stored in Firestore or browser storage
+  await confirmPasswordReset(auth, oobCode, newPassword);
+
+  return { success: true };
 }
 
 /**

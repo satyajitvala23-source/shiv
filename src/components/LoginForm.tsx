@@ -336,7 +336,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl shadow-slate-300/40 dark:shadow-black/50 p-6 sm:p-8"
+        className="iphone-glass-card p-6 sm:p-8 relative overflow-hidden"
       >
         {/* Shiv Computer Branding */}
         <BrandLogo brandName={t.brandName} tagline={t.brandTagline} />
@@ -439,13 +439,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               className={`p-3.5 rounded-xl text-xs sm:text-sm flex items-start gap-2.5 border ${
                 statusMessage.type === 'success'
                   ? 'bg-emerald-50/90 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-                  : 'bg-rose-50/90 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                  : 'bg-amber-50/90 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-100'
               }`}
             >
               {statusMessage.type === 'success' ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               ) : (
-                <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               )}
               <div className="flex-1">
                 <div className="font-semibold">{statusMessage.title}</div>
@@ -492,13 +492,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-3.5 py-2.5 sm:py-3 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.identifier
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
               </div>
               {errors.identifier && (
-                <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.identifier}</span>
                 </p>
@@ -533,7 +533,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 ${role === 'admin' ? 'pr-3.5' : 'pr-11'} py-2.5 sm:py-3 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.password
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
@@ -550,7 +550,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 )}
               </div>
               {errors.password && (
-                <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.password}</span>
                 </p>
@@ -589,11 +589,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 id="login-submit-button"
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-semibold text-sm transition-all duration-200 shadow-md ${
-                  role === 'admin'
-                    ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-blue-500/25'
-                    : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-indigo-500/25'
-                } ${isLoading ? 'opacity-85 cursor-not-allowed' : 'hover:-translate-y-0.5'}`}
+                className={`btn-glossy-primary w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-bold text-sm ${
+                  isLoading ? 'opacity-85 cursor-not-allowed' : 'active:scale-98'
+                }`}
               >
                 {isLoading ? (
                   <>
@@ -699,13 +697,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.name
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
               </div>
               {errors.name && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.name}</span>
                 </p>
@@ -737,13 +735,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.email
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.email}</span>
                 </p>
@@ -777,13 +775,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-3.5 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.mobile
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
               </div>
               {errors.mobile && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.mobile}</span>
                 </p>
@@ -815,8 +813,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-11 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.password
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
                 <button
@@ -828,7 +826,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.password}</span>
                 </p>
@@ -860,8 +858,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                   disabled={isLoading}
                   className={`w-full pl-10 pr-11 py-2.5 bg-white dark:bg-slate-800 border text-xs sm:text-sm text-slate-900 dark:text-white rounded-xl transition-all duration-200 outline-none ${
                     errors.confirmPassword
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-3 focus:ring-rose-500/15'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-indigo-600 focus:ring-3 focus:ring-indigo-600/15'
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 focus:border-blue-600 focus:ring-3 focus:ring-blue-600/15'
                   }`}
                 />
                 <button
@@ -873,7 +871,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{errors.confirmPassword}</span>
                 </p>
@@ -886,8 +884,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 id="register-submit-button"
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-semibold text-sm transition-all duration-200 shadow-md bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-indigo-500/25 ${
-                  isLoading ? 'opacity-85 cursor-not-allowed' : 'hover:-translate-y-0.5'
+                className={`btn-glossy-primary w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-bold text-sm ${
+                  isLoading ? 'opacity-85 cursor-not-allowed' : 'active:scale-98'
                 }`}
               >
                 {isLoading ? (
