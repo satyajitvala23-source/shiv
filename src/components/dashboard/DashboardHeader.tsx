@@ -95,42 +95,42 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <header
       id="dashboard-header-bar"
-      className="glass-navbar sticky top-0 z-30 min-h-16 sm:min-h-18 w-full px-3 sm:px-6 py-2 flex items-center justify-between transition-all"
+      className="glass-navbar sticky top-0 z-30 min-h-14 sm:min-h-18 w-full max-w-full px-2.5 sm:px-6 py-2 flex items-center justify-between transition-all min-w-0"
     >
       {/* Left: Mobile Toggle & Brand Identity */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-3.5 shrink min-w-0">
         <button
           type="button"
           id="mobile-sidebar-toggle-btn"
           onClick={onToggleSidebar}
-          className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 border border-slate-200/60 dark:border-white/10 transition-colors"
+          className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
           aria-label="Toggle navigation menu"
         >
           {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-transparent p-0.5 sm:p-1 flex items-center justify-center relative group shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-14 sm:h-14 rounded-2xl bg-transparent p-0.5 sm:p-1 flex items-center justify-center relative group shrink-0">
             <img
               src="/logo.png"
               alt="Shiv Computer Logo"
               className="w-full h-full object-contain filter drop-shadow-md relative z-5 transition-transform duration-300 group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-white dark:border-slate-900 z-20 shadow-xs shadow-amber-500/60" />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400 border-2 border-white dark:border-slate-900 z-20 shadow-xs shadow-amber-500/60" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-                <span className="bg-linear-to-r from-blue-700 via-blue-600 to-indigo-600 dark:from-blue-400 dark:via-sky-300 dark:to-white bg-clip-text text-transparent">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1 sm:gap-1.5 truncate">
+                <span className="bg-linear-to-r from-blue-700 via-blue-600 to-indigo-600 dark:from-blue-400 dark:via-sky-300 dark:to-white bg-clip-text text-transparent truncate">
                   Shiv Computer
                 </span>
-                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block align-middle" />
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 inline-block align-middle shrink-0" />
               </span>
               {role === 'admin' ? (
                 <div
                   id="header-role-badge"
-                  className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-800 dark:text-amber-300 border border-amber-400/30 shadow-2xs backdrop-blur-xs"
+                  className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-800 dark:text-amber-300 border border-amber-400/30 shadow-2xs backdrop-blur-xs whitespace-nowrap"
                 >
                   <ShieldCheck className="w-3 h-3 text-amber-500" />
                   <span>{language === 'gu' ? 'એડમિન પોર્ટલ' : 'Admin Portal'}</span>
@@ -138,7 +138,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               ) : (
                 <div
                   id="header-role-badge"
-                  className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 shadow-2xs backdrop-blur-xs"
+                  className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 shadow-2xs backdrop-blur-xs whitespace-nowrap"
                 >
                   <UserCheck className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                   <span>{language === 'gu' ? 'નાગરિક પોર્ટલ' : 'Citizen Portal'}</span>
@@ -256,7 +256,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {isNotifOpen && (
             <div
               id="notifications-dropdown-menu"
-              className="glass-dropdown absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl py-3 z-50 animate-in fade-in zoom-in-95"
+              className="glass-dropdown absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-2xl py-3 z-50 animate-in fade-in zoom-in-95"
             >
               <div className="px-4 pb-2.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
                 <span className="font-semibold text-xs text-slate-900 dark:text-white">
@@ -320,7 +320,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {isProfileOpen && (
             <div
               id="user-profile-dropdown-menu"
-              className="glass-dropdown absolute right-0 mt-2 w-56 rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95"
+              className="glass-dropdown absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95"
             >
               <div className="p-2 border-b border-slate-100 dark:border-white/10 mb-1">
                 <div className="font-semibold text-xs text-slate-900 dark:text-white">

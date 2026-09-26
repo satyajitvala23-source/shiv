@@ -25,7 +25,7 @@ import { useApp } from '../context/AppContext';
 interface LoginFormProps {
   role: LoginRole;
   t: TranslationStrings;
-  onForgotPasswordClick?: (prefillIdentifier?: string) => void;
+  onForgotPasswordClick: (prefillIdentifier?: string) => void;
   onBackToHomeClick: () => void;
   onLoginSuccess?: (role: LoginRole) => void;
 }
@@ -330,13 +330,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+    <div className="w-full max-w-md mx-auto min-w-0">
       <motion.div
         id="login-card"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="iphone-glass-card p-6 sm:p-8 relative overflow-hidden"
+        className="iphone-glass-card p-4 sm:p-8 relative overflow-hidden w-full max-w-full min-w-0"
       >
         {/* Shiv Computer Branding */}
         <BrandLogo brandName={t.brandName} tagline={t.brandTagline} />

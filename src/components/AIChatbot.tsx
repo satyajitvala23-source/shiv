@@ -147,10 +147,10 @@ export const AIChatbot: React.FC = () => {
     const vpW = window.innerWidth;
     const vpH = window.innerHeight;
 
-    const minX = 8;
-    const maxX = Math.max(minX, vpW - width - 8);
-    const minY = 8;
-    const maxY = Math.max(minY, vpH - height - 8);
+    const minX = 12;
+    const maxX = Math.max(minX, vpW - width - 12);
+    const minY = 12;
+    const maxY = Math.max(minY, vpH - height - 12);
 
     return {
       x: Math.max(minX, Math.min(x, maxX)),
@@ -160,7 +160,7 @@ export const AIChatbot: React.FC = () => {
 
   // Calculate default safe position for the chat panel
   const calculateDefaultPosition = useCallback((): Position => {
-    if (typeof window === 'undefined') return { x: 20, y: 20 };
+    if (typeof window === 'undefined') return { x: 12, y: 12 };
     const vpW = window.innerWidth;
     const vpH = window.innerHeight;
 
@@ -170,8 +170,8 @@ export const AIChatbot: React.FC = () => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
-          const panelWidth = vpW < 640 ? Math.min(vpW - 20, 360) : 384;
-          const panelHeight = vpW < 640 ? Math.min(vpH - 40, 520) : 540;
+          const panelWidth = vpW < 640 ? Math.min(vpW - 24, 384) : 384;
+          const panelHeight = vpW < 640 ? Math.min(vpH - 36, 500) : 540;
           return clampPosition(parsed.x, parsed.y, panelWidth, panelHeight);
         }
       }
@@ -179,12 +179,12 @@ export const AIChatbot: React.FC = () => {
       // ignore
     }
 
-    const panelWidth = vpW < 640 ? Math.min(vpW - 20, 360) : 384;
-    const panelHeight = vpW < 640 ? Math.min(vpH - 40, 520) : 540;
+    const panelWidth = vpW < 640 ? Math.min(vpW - 24, 384) : 384;
+    const panelHeight = vpW < 640 ? Math.min(vpH - 36, 500) : 540;
 
     // Intelligent positioning: avoid covering forms/modals if on left or right
-    const defaultX = buttonCorner === 'bottom-left' ? 16 : vpW - panelWidth - 20;
-    const defaultY = Math.max(16, vpH - panelHeight - 20);
+    const defaultX = buttonCorner === 'bottom-left' ? 12 : Math.max(12, vpW - panelWidth - 12);
+    const defaultY = Math.max(12, vpH - panelHeight - 16);
 
     return clampPosition(defaultX, defaultY, panelWidth, panelHeight);
   }, [buttonCorner, clampPosition]);
@@ -621,7 +621,7 @@ export const AIChatbot: React.FC = () => {
             right: !panelPos ? 'max(1rem, env(safe-area-inset-right, 16px))' : undefined,
             zIndex: 60,
           }}
-          className={`w-[calc(100vw-1.5rem)] sm:w-96 max-w-[400px] h-[540px] max-h-[82vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/30 dark:border-white/15 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl animate-in slide-in-from-bottom-4 duration-200 select-none ${
+          className={`w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:w-96 sm:max-w-[400px] h-[520px] max-h-[82vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/30 dark:border-white/15 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl animate-in slide-in-from-bottom-4 duration-200 select-none ${
             isDragging ? 'ring-2 ring-blue-500/50 shadow-blue-500/25' : ''
           }`}
           role="dialog"

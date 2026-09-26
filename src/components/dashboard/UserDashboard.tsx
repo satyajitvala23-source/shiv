@@ -231,7 +231,7 @@ export const UserDashboard: React.FC = () => {
   ];
 
   return (
-    <div id="user-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10">
+    <div id="user-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <DashboardHeader
         role="user"
@@ -239,7 +239,7 @@ export const UserDashboard: React.FC = () => {
         isSidebarOpen={isSidebarOpen}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-w-0 w-full max-w-full">
         {/* Left Sidebar */}
         <aside
           id="user-sidebar"
@@ -332,7 +332,7 @@ export const UserDashboard: React.FC = () => {
         )}
 
         {/* Main View Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-6 lg:p-8 w-full max-w-full">
           {/* Email Verification Banner (Requirement 14) */}
           {auth?.currentUser && !auth.currentUser.emailVerified && (
             <div
@@ -419,7 +419,7 @@ export const UserDashboard: React.FC = () => {
               </div>
 
               {/* Status Summary KPI Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div className="glass-card p-4 rounded-2xl flex flex-col justify-between">
                   <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
                     {language === 'gu' ? 'મારી અરજીઓ' : 'My Applications'}
@@ -487,17 +487,17 @@ export const UserDashboard: React.FC = () => {
                     : 'Enter your Application Tracking ID to view current stage and department remarks.'}
                 </p>
 
-                <form onSubmit={handleTrackSubmit} className="flex gap-2 max-w-lg">
+                <form onSubmit={handleTrackSubmit} className="flex flex-col sm:flex-row gap-2 max-w-lg w-full">
                   <input
                     type="text"
                     placeholder={language === 'gu' ? 'અરજી ID દાખલ કરો...' : 'Enter Application ID...'}
                     value={trackSearchId}
                     onChange={(e) => setTrackSearchId(e.target.value)}
-                    className="glass-input flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl outline-none"
+                    className="glass-input w-full flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-xl outline-none"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center gap-1.5 shadow-md shadow-blue-500/20 border border-white/20 transition-all active:scale-95 shrink-0"
+                    className="px-4 py-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20 border border-white/20 transition-all active:scale-95 shrink-0"
                   >
                     <span>{language === 'gu' ? 'ટ્રેક કરો' : 'Track'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -551,8 +551,8 @@ export const UserDashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[580px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3 px-4">Application ID</th>
@@ -1069,8 +1069,8 @@ export const UserDashboard: React.FC = () => {
               </div>
 
               <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[620px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3 px-4">Receipt ID</th>

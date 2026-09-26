@@ -253,7 +253,7 @@ export const AdminDashboard: React.FC = () => {
   ];
 
   return (
-    <div id="admin-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10">
+    <div id="admin-dashboard-container" className="min-h-screen flex flex-col bg-transparent text-slate-900 dark:text-white relative z-10 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <DashboardHeader
         role="admin"
@@ -261,7 +261,7 @@ export const AdminDashboard: React.FC = () => {
         isSidebarOpen={isSidebarOpen}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-w-0 w-full max-w-full">
         {/* Left Sidebar */}
         <aside
           id="admin-sidebar"
@@ -354,7 +354,7 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {/* Main View Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-6 lg:p-8 w-full max-w-full">
           {/* TAB 1: DASHBOARD OVERVIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
@@ -387,7 +387,7 @@ export const AdminDashboard: React.FC = () => {
                   <TrendingUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>{language === 'gu' ? 'મુખ્ય આંકડાઓ' : 'Core Key Performance Indicators'}</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   {/* Total Users */}
                   <div className="glass-card p-5 rounded-2xl flex flex-col justify-between">
                     <div className="flex items-center justify-between">
@@ -463,7 +463,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Status Breakdown & Revenue Secondary Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div className="glass-card p-4 rounded-2xl">
                   <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">
                     {t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')}
@@ -585,8 +585,8 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[620px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3 px-4">Application ID</th>
@@ -695,7 +695,7 @@ export const AdminDashboard: React.FC = () => {
                   <select
                     value={appStatusFilter}
                     onChange={(e) => setAppStatusFilter(e.target.value)}
-                    className="px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    className="w-full sm:w-auto px-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   >
                     <option value="all">{language === 'gu' ? 'બધી સ્થિતિ' : 'All Statuses'} ({applications.length})</option>
                     <option value="Pending">{t?.status?.pending || (language === 'gu' ? 'બાકી' : 'Pending')} ({applications.filter((a) => a.status === 'Pending').length})</option>
@@ -710,8 +710,8 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Applications Table */}
               <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[720px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3.5 px-4">Application ID</th>
@@ -1020,8 +1020,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[620px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3 px-4">Form Title</th>
@@ -1347,8 +1347,8 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Payments Table */}
               <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs sm:text-sm">
+                <div className="table-responsive-container">
+                  <table className="w-full min-w-[680px] text-left text-xs sm:text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase text-[11px] font-semibold border-b border-slate-100 dark:border-slate-800">
                       <tr>
                         <th className="py-3 px-4">Receipt ID</th>
