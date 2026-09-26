@@ -250,7 +250,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationStrings> = {
       launcherText: 'Shiv AI Assistant',
       title: 'Shiv AI Assistant',
       subtitle: 'Instant guidance for government services & schemes',
-      welcomeMsg: 'Namaste! I am the Shiv AI Assistant. How can I help you today with Gujarat e-governance, certificates, affidavits, tracking, or office visits?',
+      welcomeMsg: 'Hello! How can I help you with Shiv Computer? Ask me about Gujarat e-governance, certificates, affidavits, tracking, or office visits.',
       inputPlaceholder: 'Ask a question in English or Gujarati...',
       sendButton: 'Send',
       closeButton: 'Close',

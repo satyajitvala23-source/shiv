@@ -110,13 +110,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-blue-500/35 dark:border-white/20 p-1.5 flex items-center justify-center shadow-lg shadow-blue-500/15 relative overflow-hidden group shrink-0">
-            {/* Gloss top highlight */}
-            <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/60 to-transparent pointer-events-none rounded-t-2xl z-10" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-transparent p-0.5 sm:p-1 flex items-center justify-center relative group shrink-0">
             <img
               src="/logo.png"
               alt="Shiv Computer Logo"
-              className="w-full h-full object-contain relative z-5 transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-contain filter drop-shadow-md relative z-5 transition-transform duration-300 group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
             <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-white dark:border-slate-900 z-20 shadow-xs shadow-amber-500/60" />

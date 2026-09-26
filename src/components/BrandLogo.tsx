@@ -10,39 +10,33 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ brandName, tagline, size =
   const [imgError, setImgError] = useState(false);
 
   const containerSizes = {
-    sm: 'w-12 h-12 rounded-xl p-1.5',
-    md: 'w-16 h-16 sm:w-20 sm:h-20 rounded-2xl p-2',
-    lg: 'w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-3xl p-3 sm:p-4',
+    sm: 'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl p-1',
+    md: 'w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-1.5',
+    lg: 'w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-3xl p-2 sm:p-3',
   };
 
   return (
     <div id="shiv-computer-branding" className="flex flex-col items-center text-center select-none">
-      {/* Visual Logo Emblem - Modern Glossy Glass Framed Presentation */}
+      {/* Visual Logo Emblem - Modern Transparent & Fitted Presentation with incremented size */}
       <div className="relative mb-4 flex items-center justify-center group cursor-pointer">
         <div
-          className={`${containerSizes[size]} bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-blue-200/80 dark:border-white/20 shadow-2xl shadow-blue-600/20 flex items-center justify-center relative overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:shadow-blue-500/30`}
+          className={`${containerSizes[size]} bg-transparent flex items-center justify-center relative overflow-visible transition-all duration-300 group-hover:scale-105`}
         >
-          {/* Subtle top gloss reflection on glass container */}
-          <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/60 dark:from-white/25 to-transparent pointer-events-none rounded-t-3xl z-10" />
-
-          {/* Official Transparent Shiv Computer Logo Image */}
+          {/* Official Transparent Shiv Computer Logo Image - Cleanly fitted without opaque square */}
           {!imgError ? (
             <img
               src="/logo.png"
               alt="Shiv Computer Official Logo"
-              className="w-full h-full object-contain relative z-5 transition-transform duration-300 drop-shadow-md"
+              className="w-full h-full object-contain relative z-5 transition-transform duration-300 filter drop-shadow-xl drop-shadow-blue-600/25"
               loading="eager"
               referrerPolicy="no-referrer"
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full bg-linear-to-br from-blue-700 to-sky-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl">
+            <div className="w-full h-full bg-linear-to-br from-blue-700 to-sky-600 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-blue-500/30">
               <span>SC</span>
             </div>
           )}
-
-          {/* Subtle bottom rim light */}
-          <div className="absolute bottom-0 inset-x-0 h-[1.5px] bg-linear-to-r from-transparent via-blue-400/50 to-transparent pointer-events-none" />
         </div>
 
         {/* Ambient status light with Bright Yellow Glowing Accent */}
@@ -53,7 +47,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({ brandName, tagline, size =
       </div>
 
       {/* Brand Title: Professional Royal Blue & White with bright yellow dot accent */}
-      <h1 id="brand-heading" className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
+      <h1 id="brand-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center justify-center gap-1.5">
         <span className="bg-linear-to-r from-blue-700 via-blue-600 to-indigo-700 dark:from-blue-400 dark:via-sky-300 dark:to-white bg-clip-text text-transparent">
           {brandName}
         </span>

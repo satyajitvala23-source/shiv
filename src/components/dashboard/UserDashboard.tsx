@@ -251,12 +251,11 @@ export const UserDashboard: React.FC = () => {
           <div className="p-3 overflow-y-auto space-y-1">
             {/* Sidebar Official Brand Badge */}
             <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xs">
-              <div className="w-11 h-11 rounded-2xl bg-white/95 dark:bg-slate-950 p-1.5 flex items-center justify-center border border-blue-500/30 shadow-2xs shrink-0 overflow-hidden relative group">
-                <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/50 to-transparent pointer-events-none rounded-t-2xl" />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-transparent p-0.5 sm:p-1 flex items-center justify-center shrink-0 overflow-hidden relative group">
                 <img
                   src="/logo.png"
                   alt="Shiv Computer"
-                  className="w-full h-full object-contain relative z-5 transition-transform duration-200 group-hover:scale-105"
+                  className="w-full h-full object-contain filter drop-shadow-md relative z-5 transition-transform duration-200 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
               </div>

@@ -48,14 +48,12 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
     >
       {/* Left corner official Shiv Computer logo branding */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="flex items-center gap-2.5 sm:gap-3 px-3 py-2 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-md transition-all">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden bg-white/95 dark:bg-slate-950 p-1 sm:p-1.5 flex items-center justify-center border border-blue-500/30 relative shadow-2xs shrink-0 group">
-            {/* Subtle gloss overlay */}
-            <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/50 to-transparent pointer-events-none rounded-t-xl" />
+        <div className="flex items-center gap-2.5 sm:gap-3 px-3 py-1.5 sm:py-2 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-md transition-all">
+          <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-transparent p-0.5 sm:p-1 flex items-center justify-center relative shrink-0 group">
             <img
               src="/logo.png"
               alt="Shiv Computer Logo"
-              className="w-full h-full object-contain relative z-5 transition-transform duration-200 group-hover:scale-105"
+              className="w-full h-full object-contain filter drop-shadow-md relative z-5 transition-transform duration-200 group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
           </div>
