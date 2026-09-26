@@ -25,7 +25,7 @@ import { useApp } from '../context/AppContext';
 interface LoginFormProps {
   role: LoginRole;
   t: TranslationStrings;
-  onForgotPasswordClick: (prefillIdentifier?: string) => void;
+  onForgotPasswordClick?: (prefillIdentifier?: string) => void;
   onBackToHomeClick: () => void;
   onLoginSuccess?: (role: LoginRole) => void;
 }

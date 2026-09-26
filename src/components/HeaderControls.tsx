@@ -46,11 +46,28 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
       id="login-header-bar"
       className="w-full px-4 py-3 sm:px-8 sm:py-5 flex items-center justify-between z-30"
     >
-      {/* Optional Left corner subtle branding pill for context */}
-      <div className="flex items-center gap-2">
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200/80 text-xs font-medium text-slate-600">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Shiv Computer Portal</span>
+      {/* Left corner official Shiv Computer logo branding */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 px-3 py-2 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-md transition-all">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl overflow-hidden bg-white/95 dark:bg-slate-950 p-1 sm:p-1.5 flex items-center justify-center border border-blue-500/30 relative shadow-2xs shrink-0 group">
+            {/* Subtle gloss overlay */}
+            <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/50 to-transparent pointer-events-none rounded-t-xl" />
+            <img
+              src="/logo.png"
+              alt="Shiv Computer Logo"
+              className="w-full h-full object-contain relative z-5 transition-transform duration-200 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white tracking-tight leading-tight flex items-center gap-1.5">
+              <span>Shiv Computer</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400 inline-block shrink-0 shadow-2xs shadow-amber-400/50" />
+            </span>
+            <span className="text-[11px] sm:text-xs text-blue-600 dark:text-sky-400 font-semibold leading-tight hidden xs:inline">
+              Digital Gujarat & CSC
+            </span>
+          </div>
         </div>
       </div>
 

@@ -95,10 +95,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <header
       id="dashboard-header-bar"
-      className="glass-navbar sticky top-0 z-30 h-16 w-full px-3 sm:px-6 flex items-center justify-between transition-all"
+      className="glass-navbar sticky top-0 z-30 min-h-16 sm:min-h-18 w-full px-3 sm:px-6 py-2 flex items-center justify-between transition-all"
     >
       {/* Left: Mobile Toggle & Brand Identity */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+      <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
         <button
           type="button"
           id="mobile-sidebar-toggle-btn"
@@ -109,21 +109,25 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-400 p-0.5 flex items-center justify-center shadow-md shadow-blue-500/20 relative">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-white text-xs tracking-wider">
-              <span className="text-sky-300">S</span>
-              <span className="text-amber-400">C</span>
-            </div>
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 border border-white dark:border-slate-900" />
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-blue-500/35 dark:border-white/20 p-1.5 flex items-center justify-center shadow-lg shadow-blue-500/15 relative overflow-hidden group shrink-0">
+            {/* Gloss top highlight */}
+            <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/60 to-transparent pointer-events-none rounded-t-2xl z-10" />
+            <img
+              src="/logo.png"
+              alt="Shiv Computer Logo"
+              className="w-full h-full object-contain relative z-5 transition-transform duration-300 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-white dark:border-slate-900 z-20 shadow-xs shadow-amber-500/60" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white tracking-tight flex items-center gap-1">
-                <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 dark:from-blue-400 dark:via-sky-300 dark:to-white bg-clip-text text-transparent">
+              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                <span className="bg-linear-to-r from-blue-700 via-blue-600 to-indigo-600 dark:from-blue-400 dark:via-sky-300 dark:to-white bg-clip-text text-transparent">
                   Shiv Computer
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block align-middle" />
+                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block align-middle" />
               </span>
               {role === 'admin' ? (
                 <div

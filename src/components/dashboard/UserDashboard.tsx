@@ -249,8 +249,29 @@ export const UserDashboard: React.FC = () => {
         >
           {/* Scrollable Navigation */}
           <div className="p-3 overflow-y-auto space-y-1">
-            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              {language === 'gu' ? 'નાગરિક પોર્ટલ' : 'Citizen Portal'}
+            {/* Sidebar Official Brand Badge */}
+            <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xs">
+              <div className="w-11 h-11 rounded-2xl bg-white/95 dark:bg-slate-950 p-1.5 flex items-center justify-center border border-blue-500/30 shadow-2xs shrink-0 overflow-hidden relative group">
+                <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/50 to-transparent pointer-events-none rounded-t-2xl" />
+                <img
+                  src="/logo.png"
+                  alt="Shiv Computer"
+                  className="w-full h-full object-contain relative z-5 transition-transform duration-200 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              <div className="flex flex-col min-w-0 text-left">
+                <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                  Shiv Computer
+                </span>
+                <span className="text-[11px] text-blue-600 dark:text-sky-400 font-semibold leading-none mt-0.5">
+                  {language === 'gu' ? 'નાગરિક સેવા પોર્ટલ' : 'Citizen Portal'}
+                </span>
+              </div>
+            </div>
+
+            <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              {language === 'gu' ? 'સેવાઓ અને મેનૂ' : 'Services & Navigation'}
             </div>
 
             {navItems.map((item) => {
